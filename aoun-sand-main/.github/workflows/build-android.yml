@@ -1,0 +1,88 @@
+name: Build Android App
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'capacitor.config.ts'
+      - '.github/workflows/build-android.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android SDK Licenses
+        run: yes | sdkmanager --licenses || true
+
+      - name: Install NPM Dependencies
+        run: npm install
+
+      - name: Build Vite Web App
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+        run: npm run build
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Generate Release Keystore
+        run: |
+          keytool -genkey -v \
+            -keystore android/app/my-release-key.keystore \
+            -alias my-key-alias \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=Aoun Sand, OU=IT, O=Aoun Sand, L=City, S=State, C=PS" \
+            -storepass "aounsand2024" \
+            -keypass "aounsand2024"
+
+      - name: Grant Execute Permission for Gradlew
+        run: chmod +x android/gradlew
+
+      - name: Build Signed AAB
+        working-directory: ./android
+        run: |
+          ./gradlew bundleRelease \
+            -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/android/app/my-release-key.keystore \
+            -Pandroid.injected.signing.store.password=aounsand2024 \
+            -Pandroid.injected.signing.key.alias=my-key-alias \
+            -Pandroid.injected.signing.key.password=aounsand2024 \
+            --no-daemon \
+            --info 2>&1 | tail -100
+
+      - name: Upload AAB Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aoun-sand-app-release
+          path: android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 7
+
+      - name: Upload Keystore (KEEP THIS SAFE)
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-keystore
+          path: android/app/my-release-key.keystore
+          retention-days: 7

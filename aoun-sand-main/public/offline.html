@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عون وسند - لا يوجد اتصال</title>
+    <meta name="theme-color" content="#2E8B57">
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+            padding: 20px;
+        }
+        .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: #2E8B57;
+        }
+        h1 {
+            color: #2E8B57;
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 1.1em;
+            max-width: 400px;
+            margin-bottom: 30px;
+        }
+        button {
+            background-color: #2E8B57;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="icon">📶❌</div>
+    <h1>أنت حالياً بدون اتصال</h1>
+    <p>يبدو أن الإنترنت غير متوفر لديك حالياً. يمكنك عرض الصفحات المحفوظة مسبقاً، أو المحاولة مرة أخرى لاحقاً.</p>
+    <button onclick="window.location.reload()">إعادة المحاولة</button>
+</body>
+</html>
