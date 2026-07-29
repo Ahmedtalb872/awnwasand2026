@@ -33,7 +33,7 @@ export const MembershipsTab = () => {
         const userIds = [...new Set((data || []).map((m: any) => m.user_id))];
         let usersMap: Record<string, any> = {};
         if (userIds.length > 0) {
-          const { data: usersData } = await supabase.from('users').select('id, name, phone').in('id', userIds);
+          const { data: usersData } = await supabase.from('users').select('id, full_name, phone').in('id', userIds);
           (usersData || []).forEach((u: any) => { usersMap[u.id] = u; });
         }
         setMemberships((data || []).map((m: any) => ({ ...m, user: usersMap[m.user_id] })));
@@ -71,7 +71,7 @@ export const MembershipsTab = () => {
   const filtered = filterStatus === 'all' ? memberships : memberships.filter(m => m.status === filterStatus);
 
   const StatusBadge = ({ status }: { status: string }) => {
-    if (status === 'approved') return <span className="flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full"><CheckCircle className="w-3 h-3"/>مقبول</span>;
+    if (status === 'approved') return <span className="flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full"><CheckCircle className="w-3 h-3"/>تم الدفع</span>;
     if (status === 'rejected') return <span className="flex items-center gap-1 text-xs font-bold text-red-700 bg-red-100 px-2 py-1 rounded-full"><XCircle className="w-3 h-3"/>مرفوض</span>;
     return <span className="flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-100 px-2 py-1 rounded-full"><Clock className="w-3 h-3"/>قيد الانتظار</span>;
   };
@@ -106,7 +106,7 @@ export const MembershipsTab = () => {
           {filtered.map(m => (
             <div key={m.id} className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-slate-800 dark:text-white">{m.user?.name || m.user_id}</p>
+                <p className="font-bold text-slate-800 dark:text-white">{m.user?.full_name || m.user_id}</p>
                 <p className="text-sm text-slate-500">{m.user?.phone} · {new Date(m.created_at).toLocaleDateString('ar-EG')}</p>
                 {m.notes && <p className="text-sm mt-1 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 p-2 rounded-lg">{m.notes}</p>}
               </div>

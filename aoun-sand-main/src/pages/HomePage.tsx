@@ -10,6 +10,7 @@ import {
   Target, CheckCircle2, Bell, Receipt, Trophy, CreditCard, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { PollsSection } from '../components/PollsSection';
+import { MembershipFeeModal } from '../components/MembershipFeeModal';
 
 /* ── Animated Counter ── */
 const useCounter = (target: number, duration = 2000) => {
@@ -203,7 +204,7 @@ const DonationBanner = ({ campaigns, settings, isRTL, language }: { campaigns: a
 
 /* ── Main Component ── */
 export const HomePage = () => {
-  const { userProfile } = useAuth();
+  const { user, userProfile } = useAuth();
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
   const hp = (t as any).homePage || {};
@@ -211,6 +212,21 @@ export const HomePage = () => {
   const [usersCount, setUsersCount] = useState(0);
   const [settings, setSettings] = useState<any>(null);
   const [settingsLoaded, setSettingsLoaded] = useState(false);
+  const [membershipStatus, setMembershipStatus] = useState<'none' | 'pending' | 'approved' | 'rejected'>('none');
+  const [showFeeModal, setShowFeeModal] = useState(false);
+
+  /* ── Fetch latest membership fee request status ── */
+  const fetchMembershipStatus = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('user_memberships')
+      .select('status')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    setMembershipStatus((data?.status as any) || 'none');
+  };
 
   /* ── Fetch accurate user count via RPC (reads auth.users) ── */
   const fetchUsersCount = async () => {
@@ -278,6 +294,17 @@ export const HomePage = () => {
       supabase.removeChannel(ch2);
     };
   }, []);
+
+  // Realtime: membership fee request status changes (e.g. admin approval)
+  useEffect(() => {
+    if (!user) return;
+    fetchMembershipStatus();
+    const chMembership = supabase.channel(`hp:memberships:${user.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'user_memberships', filter: `user_id=eq.${user.id}` },
+        () => fetchMembershipStatus())
+      .subscribe();
+    return () => { supabase.removeChannel(chMembership); };
+  }, [user]);
 
   const animatedMembers = useCounter(usersCount, 2000);
 
@@ -386,22 +413,52 @@ export const HomePage = () => {
 
           {/* Subscription Card */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-            <Link to="/account" className="block bg-rose-50 dark:bg-rose-900/20 rounded-[2rem] p-5 sm:p-6 shadow-md hover:-translate-y-1 transition-all">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-white dark:bg-rose-900/40 flex items-center justify-center shrink-0 shadow-sm border border-rose-100 dark:border-rose-800">
-                  <CreditCard className="w-6 h-6 text-rose-500" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-black text-rose-900 dark:text-rose-100 text-sm sm:text-base mb-1">{isRTL ? 'دفع رسوم الانتساب الشهري' : 'Pay Monthly Subscription'}</h3>
-                  <p className="text-[11px] sm:text-xs text-rose-700/70 dark:text-rose-300/70 font-medium leading-relaxed">
-                    {isRTL ? 'ساهم بانتظام في سداد اشتراكك لدعم واستمرارية المشاريع الإنسانية للجمعية.' : 'Contribute regularly to your subscription to support our humanitarian projects.'}
-                  </p>
-                </div>
-                <div className="w-6 h-6 flex items-center justify-center shrink-0">
-                  {isRTL ? <ChevronLeft className="w-5 h-5 text-rose-400" /> : <ChevronRight className="w-5 h-5 text-rose-400" />}
+            {membershipStatus === 'approved' ? (
+              <div className="block bg-emerald-50 dark:bg-emerald-900/20 rounded-[2rem] p-5 sm:p-6 shadow-md">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-white dark:bg-emerald-900/40 flex items-center justify-center shrink-0 shadow-sm border border-emerald-100 dark:border-emerald-800">
+                    <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-black text-emerald-900 dark:text-emerald-100 text-sm sm:text-base mb-1">{isRTL ? 'تم دفع رسوم الانتساب' : 'Membership Fee Paid'}</h3>
+                    <p className="text-[11px] sm:text-xs text-emerald-700/70 dark:text-emerald-300/70 font-medium leading-relaxed">
+                      {isRTL ? 'شكراً لك، تم تأكيد استلام رسوم انتسابك من الإدارة.' : 'Thank you, your membership fee has been confirmed by the admin.'}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </Link>
+            ) : membershipStatus === 'pending' ? (
+              <div className="block bg-amber-50 dark:bg-amber-900/20 rounded-[2rem] p-5 sm:p-6 shadow-md">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-white dark:bg-amber-900/40 flex items-center justify-center shrink-0 shadow-sm border border-amber-100 dark:border-amber-800">
+                    <CreditCard className="w-6 h-6 text-amber-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-black text-amber-900 dark:text-amber-100 text-sm sm:text-base mb-1">{isRTL ? 'طلبك قيد المراجعة' : 'Request Under Review'}</h3>
+                    <p className="text-[11px] sm:text-xs text-amber-700/70 dark:text-amber-300/70 font-medium leading-relaxed">
+                      {isRTL ? 'تم إرسال طلب دفع رسوم الانتساب، بانتظار موافقة الإدارة.' : 'Your membership fee request was submitted and is awaiting admin approval.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <button onClick={() => setShowFeeModal(true)} className="w-full text-start block bg-rose-50 dark:bg-rose-900/20 rounded-[2rem] p-5 sm:p-6 shadow-md hover:-translate-y-1 transition-all">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-white dark:bg-rose-900/40 flex items-center justify-center shrink-0 shadow-sm border border-rose-100 dark:border-rose-800">
+                    <CreditCard className="w-6 h-6 text-rose-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-black text-rose-900 dark:text-rose-100 text-sm sm:text-base mb-1">{isRTL ? 'دفع رسوم الانتساب' : 'Pay Membership Fee'}</h3>
+                    <p className="text-[11px] sm:text-xs text-rose-700/70 dark:text-rose-300/70 font-medium leading-relaxed">
+                      {isRTL ? 'ساهم بانتظام في سداد اشتراكك لدعم واستمرارية المشاريع الإنسانية للجمعية.' : 'Contribute regularly to your subscription to support our humanitarian projects.'}
+                    </p>
+                  </div>
+                  <div className="w-6 h-6 flex items-center justify-center shrink-0">
+                    {isRTL ? <ChevronLeft className="w-5 h-5 text-rose-400" /> : <ChevronRight className="w-5 h-5 text-rose-400" />}
+                  </div>
+                </div>
+              </button>
+            )}
           </motion.div>
 
           {/* Transparency Card */}
@@ -473,6 +530,13 @@ export const HomePage = () => {
         </div>
 
       </div>
+
+      {showFeeModal && (
+        <MembershipFeeModal
+          onClose={() => setShowFeeModal(false)}
+          onSubmitted={fetchMembershipStatus}
+        />
+      )}
     </div>
   );
 };

@@ -158,10 +158,10 @@ export const UserRequestsPage = () => {
       {userProfile && (
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 mb-6 flex items-center gap-4">
           <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center text-white font-black text-lg">
-            {(userProfile.name || '?').charAt(0)}
+            {(userProfile.full_name || '?').charAt(0)}
           </div>
           <div>
-            <p className="font-bold text-slate-800 dark:text-white">{userProfile.name}</p>
+            <p className="font-bold text-slate-800 dark:text-white">{userProfile.full_name}</p>
             <p className="text-sm text-slate-500 flex items-center gap-1"><Phone className="w-3 h-3"/>{userProfile.phone}</p>
           </div>
         </div>
@@ -269,7 +269,7 @@ export const UserRequestsPage = () => {
             {/* Read-only User Info */}
             <div className="mb-6 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
               <p className="text-xs text-slate-400 mb-1 font-bold uppercase tracking-wide">{isRTL ? 'بيانات المستخدم (للقراءة فقط)' : 'User Info (Read-only)'}</p>
-              <p className="font-bold text-slate-700 dark:text-slate-200">{userProfile?.name}</p>
+              <p className="font-bold text-slate-700 dark:text-slate-200">{userProfile?.full_name}</p>
               <p className="text-sm text-slate-500">{userProfile?.phone}</p>
             </div>
 
