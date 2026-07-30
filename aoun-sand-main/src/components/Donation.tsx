@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Heart, CheckCircle2, MessageCircle, ArrowRight, Upload, User, Phone, Utensils, Droplets, GraduationCap, Stethoscope, Baby, HelpCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Heart, CheckCircle2, MessageCircle, ArrowRight, Upload, User, Phone, Utensils, Droplets, GraduationCap, Stethoscope, Baby, HelpCircle, BookOpen, Sparkles } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -8,8 +8,10 @@ import toast from 'react-hot-toast';
 interface Category {
   id: string;
   name: string;
+  desc: string;
   icon: any;
   color: string;
+  ring: string;
 }
 
 const WHATSAPP_NUMBER = '32203250';
@@ -25,16 +27,37 @@ export const Donation = () => {
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [funds, setFunds] = useState<Record<string, number>>({});
 
   const categories: Category[] = [
-    { id: 'water', name: language === 'ar' ? 'سقاية الماء' : 'Water Supply', icon: Droplets, color: 'bg-blue-500' },
-    { id: 'fasting', name: language === 'ar' ? 'إفطار الصائم' : 'Fasting Breakfast', icon: Utensils, color: 'bg-orange-500' },
-    { id: 'poor', name: language === 'ar' ? 'دعم الأسر الفقيرة' : 'Support Poor Families', icon: Heart, color: 'bg-red-500' },
-    { id: 'orphan', name: language === 'ar' ? 'كفالة يتيم' : 'Orphan Sponsoring', icon: Baby, color: 'bg-indigo-500' },
-    { id: 'education', name: language === 'ar' ? 'دعم التعليم' : 'Education Support', icon: GraduationCap, color: 'bg-emerald-500' },
-    { id: 'patient', name: language === 'ar' ? 'رعاية مريض' : 'Patient Care', icon: Stethoscope, color: 'bg-teal-500' },
-    { id: 'other', name: language === 'ar' ? 'أخرى' : 'Other', icon: HelpCircle, color: 'bg-gray-500' },
+    { id: 'mahaja', name: isRTL ? 'معهد المحجة البيضاء' : 'Al-Mahaja Institute', desc: isRTL ? 'دعم التعليم الشرعي والمحظرة' : 'Support Islamic education', icon: BookOpen, color: 'from-indigo-500 to-indigo-700', ring: 'ring-indigo-200' },
+    { id: 'orphan', name: isRTL ? 'كفالة يتيم' : 'Orphan Sponsoring', desc: isRTL ? 'احتضان ورعاية شهرية' : 'Monthly care & sponsorship', icon: Baby, color: 'from-purple-500 to-purple-700', ring: 'ring-purple-200' },
+    { id: 'poor', name: isRTL ? 'دعم الأسر الفقيرة' : 'Support Poor Families', desc: isRTL ? 'مساعدات غذائية وأساسية' : 'Food & essential aid', icon: Heart, color: 'from-rose-500 to-rose-700', ring: 'ring-rose-200' },
+    { id: 'fasting', name: isRTL ? 'إفطار الصائم' : 'Fasting Breakfast', desc: isRTL ? 'وجبات إفطار في رمضان' : 'Ramadan iftar meals', icon: Utensils, color: 'from-orange-500 to-orange-700', ring: 'ring-orange-200' },
+    { id: 'water', name: isRTL ? 'سقاية الماء' : 'Water Supply', desc: isRTL ? 'آبار ونقاط مياه للمحتاجين' : 'Wells & water points', icon: Droplets, color: 'from-blue-500 to-blue-700', ring: 'ring-blue-200' },
+    { id: 'education', name: isRTL ? 'دعم التعليم' : 'Education Support', desc: isRTL ? 'أدوات ومنح دراسية' : 'School supplies & grants', icon: GraduationCap, color: 'from-emerald-500 to-emerald-700', ring: 'ring-emerald-200' },
+    { id: 'patient', name: isRTL ? 'رعاية مريض' : 'Patient Care', desc: isRTL ? 'مساعدة في تكاليف العلاج' : 'Help with treatment costs', icon: Stethoscope, color: 'from-teal-500 to-teal-700', ring: 'ring-teal-200' },
+    { id: 'other', name: isRTL ? 'مجال آخر' : 'Other', desc: isRTL ? 'أي مساهمة إنسانية أخرى' : 'Any other contribution', icon: HelpCircle, color: 'from-slate-500 to-slate-700', ring: 'ring-slate-200' },
   ];
+
+  const fetchFunds = async () => {
+    const { data } = await supabase.from('donation_category_funds').select('category, total_amount');
+    if (data) {
+      const map: Record<string, number> = {};
+      data.forEach((row: any) => { map[row.category] = Number(row.total_amount) || 0; });
+      setFunds(map);
+    }
+  };
+
+  useEffect(() => {
+    fetchFunds();
+    const ch = supabase.channel('donate:funds')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'donation_category_funds' }, fetchFunds)
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, []);
+
+  const totalRaised = Object.values(funds).reduce((s, v) => s + v, 0);
 
   const handleCategorySelect = (category: Category) => {
     setSelectedCategory(category);
@@ -88,6 +111,7 @@ export const Donation = () => {
         user_id: user.id,
         amount: parseFloat(amount),
         receipt_url,
+        category: selectedCategory.id,
         notes: isRTL ? `مجال التبرع: ${selectedCategory.name}` : `Donation cause: ${selectedCategory.name}`,
       });
       if (error) throw error;
@@ -101,24 +125,33 @@ export const Donation = () => {
     }
   };
 
+  const fmt = (n: number) => n.toLocaleString(isRTL ? 'ar-EG' : 'en-US', { maximumFractionDigits: 0 });
+
   return (
     <section
       id="donate"
-      className="py-20 bg-gradient-to-br from-rose-50 via-pink-50 to-red-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-colors duration-300 min-h-screen"
+      className="py-16 bg-gradient-to-br from-slate-50 via-rose-50/40 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors duration-300 min-h-screen"
     >
       <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           {/* Header */}
-          <div className="text-center mb-12 animate-fadeIn">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#2E8B57] to-[#1E88E5] rounded-full mb-6 shadow-2xl">
-              <Heart className="w-10 h-10 text-white animate-pulse" />
+          <div className="text-center mb-10 animate-fadeIn">
+            <div className="inline-flex items-center gap-2 bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 px-4 py-1.5 rounded-full text-xs font-black mb-5">
+              <Sparkles className="w-3.5 h-3.5" />
+              {isRTL ? 'كن سبباً في فرحة محتاج' : 'Be a reason for someone\'s smile'}
             </div>
-            <h2 className={`text-4xl font-bold mb-4 bg-gradient-to-r from-teal-700 to-blue-700 bg-clip-text text-transparent ${language === 'ar' ? 'font-arabic' : ''}`}>
+            <h2 className={`text-3xl md:text-4xl font-black mb-3 text-slate-800 dark:text-white ${language === 'ar' ? 'font-arabic' : ''}`}>
               {t.donation.title}
             </h2>
-            <p className={`text-xl text-gray-600 dark:text-gray-300 ${language === 'ar' ? 'font-arabic' : ''}`}>
-              {step === 1 ? (isRTL ? 'اختر مجال التبرع' : 'Choose a donation cause') : step === 2 ? (isRTL ? 'أدخل مبلغ التبرع' : 'Enter donation amount') : (isRTL ? 'تم الإرسال' : 'Submitted')}
+            <p className="text-slate-500 dark:text-slate-400 mb-6">
+              {step === 1 ? (isRTL ? 'اختر المجال الذي تريد دعمه' : 'Choose the cause you want to support') : step === 2 ? (isRTL ? 'بياناتك جاهزة، أدخل المبلغ فقط' : 'Your info is ready, just enter the amount') : (isRTL ? 'تم استلام طلبك' : 'Your request was received')}
             </p>
+            {totalRaised > 0 && (
+              <div className="inline-flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-2.5 shadow-sm">
+                <span className="text-xs text-slate-400 font-bold">{isRTL ? 'إجمالي المبالغ المعتمدة' : 'Total approved so far'}</span>
+                <span className="font-black text-rose-600 dark:text-rose-400">{fmt(totalRaised)} MRU</span>
+              </div>
+            )}
           </div>
 
           {/* Navigation Back */}
@@ -134,33 +167,43 @@ export const Donation = () => {
 
           {/* Step 1: Category Selection */}
           {step === 1 && (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 animate-slideUp">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 animate-slideUp">
               {categories.map((category) => (
                 <button
                   key={category.id}
                   onClick={() => handleCategorySelect(category)}
-                  className="group flex flex-col items-center justify-center p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-105"
+                  className="group relative flex flex-col items-start p-5 bg-white dark:bg-slate-800 rounded-3xl shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden text-start"
                 >
-                  <div className={`${category.color} w-16 h-16 rounded-full flex items-center justify-center mb-4 text-white shadow-md group-hover:scale-110 transition-transform`}>
-                    <category.icon className="w-8 h-8" />
+                  <div className={`absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r ${category.color}`} />
+                  <div className={`bg-gradient-to-br ${category.color} w-14 h-14 rounded-2xl flex items-center justify-center mb-4 text-white shadow-md ring-4 ${category.ring} dark:ring-0 group-hover:scale-105 transition-transform`}>
+                    <category.icon className="w-7 h-7" />
                   </div>
-                  <span className="font-bold text-gray-800 dark:text-white text-lg text-center">{category.name}</span>
+                  <span className="font-black text-gray-800 dark:text-white text-base mb-1">{category.name}</span>
+                  <span className="text-xs text-gray-400 dark:text-slate-500 mb-3 leading-relaxed">{category.desc}</span>
+                  <span className="mt-auto text-[11px] font-bold text-slate-400 dark:text-slate-500">
+                    {isRTL ? 'تم جمع ' : 'Raised '}
+                    <span className="text-slate-700 dark:text-slate-200">{fmt(funds[category.id] || 0)} MRU</span>
+                  </span>
                 </button>
               ))}
             </div>
           )}
 
-          {/* Step 2: Amount form (same pattern as membership fee) */}
+          {/* Step 2: Amount form (auto-filled, same pattern as membership fee) */}
           {step === 2 && selectedCategory && (
             <div className="animate-fadeIn">
               <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl p-6 md:p-10 max-w-lg mx-auto">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className={`${selectedCategory.color} w-12 h-12 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-sm`}>
+                  <div className={`bg-gradient-to-br ${selectedCategory.color} w-12 h-12 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-sm`}>
                     <selectedCategory.icon className="w-6 h-6" />
                   </div>
                   <div>
                     <p className="text-xs text-gray-400 font-bold uppercase tracking-wide">{isRTL ? 'مجال التبرع' : 'Cause'}</p>
                     <h3 className="font-black text-gray-800 dark:text-white">{selectedCategory.name}</h3>
+                  </div>
+                  <div className="ms-auto text-end">
+                    <p className="text-[10px] text-slate-400 font-bold">{isRTL ? 'تم جمعه' : 'Raised'}</p>
+                    <p className="font-black text-sm text-slate-700 dark:text-slate-200">{fmt(funds[selectedCategory.id] || 0)} MRU</p>
                   </div>
                 </div>
 
@@ -211,7 +254,7 @@ export const Donation = () => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-4 px-6 bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-700 hover:to-rose-600 text-white rounded-2xl font-bold text-base shadow-[0_8px_20px_-4px_rgba(225,29,72,0.4)] transform transition-all active:scale-[0.98] disabled:opacity-70 disabled:active:scale-100 flex items-center justify-center"
+                    className={`w-full py-4 px-6 bg-gradient-to-r ${selectedCategory.color} text-white rounded-2xl font-bold text-base shadow-lg transform transition-all active:scale-[0.98] disabled:opacity-70 disabled:active:scale-100 flex items-center justify-center`}
                   >
                     {isLoading ? (
                       <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
