@@ -2,11 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Upload, FileText, CheckCircle, Clock, XCircle, CreditCard, Heart, Plus, User, Phone, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Upload, FileText, CheckCircle, Clock, XCircle, CreditCard, Plus, User, Phone, ArrowLeft, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 
-type TabType = 'requests' | 'payments' | 'memberships' | 'donations';
+type TabType = 'requests' | 'payments' | 'memberships';
 
 export const UserRequestsPage = () => {
   const { user, userProfile } = useAuth();
@@ -14,7 +14,7 @@ export const UserRequestsPage = () => {
   const isRTL = language === 'ar';
 
   const [activeTab, setActiveTab] = useState<TabType>('requests');
-  const [data, setData] = useState<Record<TabType, any[]>>({ requests: [], payments: [], memberships: [], donations: [] });
+  const [data, setData] = useState<Record<TabType, any[]>>({ requests: [], payments: [], memberships: [] });
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   
   const [showForm, setShowForm] = useState(false);
@@ -34,7 +34,7 @@ export const UserRequestsPage = () => {
     if (user) {
       fetchAll();
       
-      const channels = ['user_requests', 'user_payments', 'user_memberships', 'user_donations'].map(table =>
+      const channels = ['user_requests', 'user_payments', 'user_memberships'].map(table =>
         supabase.channel(`user:${table}`)
           .on('postgres_changes', { event: '*', schema: 'public', table, filter: `user_id=eq.${user.id}` }, fetchAll)
           .subscribe()
@@ -45,18 +45,16 @@ export const UserRequestsPage = () => {
 
   const fetchAll = async () => {
     if (!user) return;
-    const [reqsRes, paysRes, membRes, donRes, methodsRes] = await Promise.all([
+    const [reqsRes, paysRes, membRes, methodsRes] = await Promise.all([
       supabase.from('user_requests').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
       supabase.from('user_payments').select('*, payment_methods(name)').eq('user_id', user.id).order('created_at', { ascending: false }),
       supabase.from('user_memberships').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
-      supabase.from('user_donations').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
       supabase.from('payment_methods').select('*').eq('is_active', true)
     ]);
     setData({
       requests: reqsRes.data || [],
       payments: paysRes.data || [],
-      memberships: membRes.data || [],
-      donations: donRes.data || []
+      memberships: membRes.data || []
     });
     if (methodsRes.data) setPaymentMethods(methodsRes.data);
   };
@@ -115,11 +113,6 @@ export const UserRequestsPage = () => {
         const { error } = await supabase.from('user_memberships').insert({ user_id: user.id, amount: parseFloat(amount), notes, receipt_url });
         if (error) throw error;
         toast.success(isRTL ? 'تم إرسال طلب الانتساب' : 'Membership request submitted');
-      } else if (activeTab === 'donations') {
-        if (!amount) { toast.error(isRTL ? 'المبلغ مطلوب' : 'Amount required'); submitLock.current = false; setIsLoading(false); return; }
-        const { error } = await supabase.from('user_donations').insert({ user_id: user.id, amount: parseFloat(amount), notes, receipt_url });
-        if (error) throw error;
-        toast.success(isRTL ? 'شكراً على تبرعك!' : 'Thank you for your donation!');
       }
 
       resetForm();
@@ -147,7 +140,6 @@ export const UserRequestsPage = () => {
     { id: 'requests', label: isRTL ? 'الطلبات' : 'Requests', icon: FileText, color: 'text-blue-600' },
     { id: 'payments', label: isRTL ? 'المدفوعات' : 'Payments', icon: CreditCard, color: 'text-indigo-600' },
     { id: 'memberships', label: isRTL ? 'الانتساب' : 'Membership', icon: User, color: 'text-teal-600' },
-    { id: 'donations', label: isRTL ? 'التبرعات' : 'Donations', icon: Heart, color: 'text-rose-600' },
   ];
 
   return (
@@ -209,8 +201,7 @@ export const UserRequestsPage = () => {
                       <h3 className="font-bold text-slate-800 dark:text-white mt-0.5">
                         {activeTab === 'requests' ? item.request_type :
                          activeTab === 'payments' ? (item.payment_methods?.name || 'Payment') :
-                         activeTab === 'memberships' ? (isRTL ? 'رسم انتساب' : 'Membership Fee') :
-                         (isRTL ? 'تبرع' : 'Donation')}
+                         (isRTL ? 'رسم انتساب' : 'Membership Fee')}
                       </h3>
                     </div>
                     <div className="flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-700">
@@ -261,8 +252,7 @@ export const UserRequestsPage = () => {
               <h2 className="text-2xl font-bold text-slate-800 dark:text-white">
                 {activeTab === 'requests' ? (isRTL ? 'طلب جديد' : 'New Request') :
                  activeTab === 'payments' ? (isRTL ? 'دفعة جديدة' : 'New Payment') :
-                 activeTab === 'memberships' ? (isRTL ? 'رسم انتساب جديد' : 'New Membership Fee') :
-                 (isRTL ? 'تبرع جديد' : 'New Donation')}
+                 (isRTL ? 'رسم انتساب جديد' : 'New Membership Fee')}
               </h2>
             </div>
 
