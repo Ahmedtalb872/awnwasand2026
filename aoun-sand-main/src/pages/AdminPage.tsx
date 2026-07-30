@@ -3,13 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Users, Bell, Vote, Upload, LogOut, ShieldAlert, LayoutDashboard, HandHeart, ShieldCheck, DollarSign, HeartPulse, BookOpen, UserCog, FileText, CreditCard, Heart } from 'lucide-react';
+import { Users, Bell, Vote, Upload, LogOut, ShieldAlert, LayoutDashboard, ShieldCheck, DollarSign, HeartPulse, BookOpen, UserCog, FileText, CreditCard, Heart } from 'lucide-react';
 
 import { UsersTab } from '../components/admin/UsersTab';
 import { NotificationsTab } from '../components/admin/NotificationsTab';
 import { PollsTab } from '../components/admin/PollsTab';
 import { MediaTab } from '../components/admin/MediaTab';
-import { DonationsTab } from '../components/admin/DonationsTab';
 import { ApprovalsTab } from '../components/admin/ApprovalsTab';
 import { FinanceTab } from '../components/admin/FinanceTab';
 import { PatientsTab } from '../components/admin/PatientsTab';
@@ -31,7 +30,7 @@ export const AdminPage = () => {
   const [password, setPassword] = useState('');
   const [adminRole, setAdminRole] = useState<string>('Super Admin');
   
-  const [activeTab, setActiveTab] = useState<'users' | 'approvals' | 'notifications' | 'voting' | 'media' | 'donations' | 'finance' | 'patients' | 'mahaja' | 'admins' | 'requests' | 'competitions' | 'memberships' | 'user_donations'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'approvals' | 'notifications' | 'voting' | 'media' | 'finance' | 'patients' | 'mahaja' | 'admins' | 'requests' | 'competitions' | 'memberships' | 'user_donations'>('users');
   
   // Dashboard state
   const [usersCount, setUsersCount] = useState(0);
@@ -260,7 +259,6 @@ export const AdminPage = () => {
     { id: 'approvals',     icon: ShieldCheck, label: isRTL ? 'طلبات الموافقة' : 'User Approvals', color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
     { id: 'notifications', icon: Bell,      label: isRTL ? 'الإشعارات'  : 'Notifications',  color: 'text-amber-500',  bg: 'bg-amber-50 dark:bg-amber-900/20'  },
     { id: 'voting',        icon: Vote,      label: isRTL ? 'التصويت'    : 'Voting',         color: 'text-teal-500',   bg: 'bg-teal-50 dark:bg-teal-900/20'   },
-    { id: 'donations',     icon: HandHeart, label: isRTL ? 'التبرعات'   : 'Donations',      color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20'},
     { id: 'patients',      icon: HeartPulse, label: isRTL ? 'إدارة المرضى' : 'Patients',    color: 'text-rose-500',   bg: 'bg-rose-50 dark:bg-rose-900/20'   },
     { id: 'media',         icon: Upload,    label: isRTL ? 'الوسائط'    : 'Media',          color: 'text-pink-500',   bg: 'bg-pink-50 dark:bg-pink-900/20'   },
     { id: 'finance',       icon: DollarSign, label: isRTL ? 'المالية'    : 'Finance',        color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
@@ -351,7 +349,6 @@ export const AdminPage = () => {
               {activeTab === 'approvals'     && <ApprovalsTab users={users} onRefresh={fetchUsers} />}
               {activeTab === 'notifications' && <NotificationsTab notifications={notifications} fetchDashboardData={fetchDashboardData} />}
               {activeTab === 'voting'        && <PollsTab polls={polls} fetchDashboardData={fetchDashboardData} />}
-              {activeTab === 'donations'     && <DonationsTab fetchDashboardData={fetchDashboardData} />}
               {activeTab === 'patients'      && <PatientsTab />}
               {activeTab === 'media'         && <MediaTab mediaFiles={mediaFiles} fetchMedia={fetchMedia} />}
               {activeTab === 'finance'       && <FinanceTab />}
