@@ -30,9 +30,9 @@ export const UserDonationsTab = () => {
         const { data, error } = await supabase.rpc('admin_get_all_donations', { p_admin_id: adminId });
         if (error) throw error;
         const userIds = [...new Set((data || []).map((d: any) => d.user_id))];
-        let usersMap: Record<string, any> = {};
+        const usersMap: Record<string, any> = {};
         if (userIds.length > 0) {
-          const { data: usersData } = await supabase.from('users').select('id, name, phone').in('id', userIds);
+          const { data: usersData } = await supabase.from('users').select('id, full_name, phone').in('id', userIds);
           (usersData || []).forEach((u: any) => { usersMap[u.id] = u; });
         }
         setDonations((data || []).map((d: any) => ({ ...d, user: usersMap[d.user_id] })));
@@ -70,7 +70,7 @@ export const UserDonationsTab = () => {
   const totalApproved = donations.filter(d => d.status === 'approved').reduce((sum, d) => sum + Number(d.amount || 0), 0);
 
   const StatusBadge = ({ status }: { status: string }) => {
-    if (status === 'approved') return <span className="flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full"><CheckCircle className="w-3 h-3"/>مقبول</span>;
+    if (status === 'approved') return <span className="flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full"><CheckCircle className="w-3 h-3"/>تم الدفع</span>;
     if (status === 'rejected') return <span className="flex items-center gap-1 text-xs font-bold text-red-700 bg-red-100 px-2 py-1 rounded-full"><XCircle className="w-3 h-3"/>مرفوض</span>;
     return <span className="flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-100 px-2 py-1 rounded-full"><Clock className="w-3 h-3"/>قيد الانتظار</span>;
   };
@@ -107,7 +107,7 @@ export const UserDonationsTab = () => {
           {filtered.map(d => (
             <div key={d.id} className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-slate-800 dark:text-white">{d.user?.name || d.user_id}</p>
+                <p className="font-bold text-slate-800 dark:text-white">{d.user?.full_name || d.user_id}</p>
                 <p className="text-sm text-slate-500">{d.user?.phone} · {new Date(d.created_at).toLocaleDateString('ar-EG')}</p>
                 {d.notes && <p className="text-sm mt-1 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 p-2 rounded-lg">{d.notes}</p>}
               </div>
