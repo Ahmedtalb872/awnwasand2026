@@ -37,8 +37,8 @@ export const MembershipCardModal: React.FC<MembershipCardModalProps> = ({ isOpen
   const membershipId = card?.card_id || userProfile?.unique_short_id || '---';
   // QR must encode card.card_id — this is exactly what verify_membership_card() searches for in the DB
   const verifyUrl = card?.card_id
-    ? `https://www.awnwasand.site/verify-card/${card.card_id}`
-    : `https://www.awnwasand.site/verify-card/`;
+    ? `${window.location.origin}/verify-card/${card.card_id}`
+    : `${window.location.origin}/verify-card/`;
 
   const issueDate = card
     ? new Date(card.issue_date).toLocaleDateString('ar-SA', { year: 'numeric', month: '2-digit', day: '2-digit' })
@@ -365,10 +365,8 @@ export const MembershipCardModal: React.FC<MembershipCardModalProps> = ({ isOpen
 
       ctx.fillStyle = CLR_DARK;
       ctx.font = '700 9px sans-serif';
-      ctx.direction = 'ltr'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-      ctx.fillText('www.awnwasand.site', 14, fY2 + footH / 2);
-      ctx.textAlign = 'right';
-      ctx.fillText('Awn & Sanad Charity – Mauritania', W - 14, fY2 + footH / 2);
+      ctx.direction = 'ltr'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('Awn & Sanad Charity – Mauritania', W / 2, fY2 + footH / 2);
 
       // ════════════════════════════════════════════
       // EXPORT
@@ -691,11 +689,7 @@ const CardFront: React.FC<CardFrontProps> = ({ userProfile, membershipId, issueD
         </div>
 
         {/* ── FOOTER (white/light) ── */}
-        <div style={{ background: LIGHT_BG, padding: '5px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(38,35,63,0.08)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={DARK} strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-            <span style={{ fontSize: '9px', color: DARK, fontWeight: 700, fontFamily: 'sans-serif' }}>www.awnwasand.site</span>
-          </div>
+        <div style={{ background: LIGHT_BG, padding: '5px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderTop: '1px solid rgba(38,35,63,0.08)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={DARK} strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             <span style={{ fontSize: '9px', color: DARK, fontWeight: 600, fontFamily: 'sans-serif' }}>Awn &amp; Sanad Charity – Mauritania</span>
@@ -766,8 +760,7 @@ const CardBack: React.FC = () => (
         </div>
       ))}
     </div>
-    <div style={{ background: '#f1f5f9', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 14px', flexShrink: 0, borderTop: '1px solid #e2e8f0' }}>
-      <span style={{ fontSize: '8px', color: '#64748b', fontWeight: 600 }}>www.awnwasand.site</span>
+    <div style={{ background: '#f1f5f9', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 14px', flexShrink: 0, borderTop: '1px solid #e2e8f0' }}>
       <span style={{ fontSize: '8px', color: '#94a3b8' }}>Awn &amp; Sanad Charity – Mauritania</span>
     </div>
   </div>

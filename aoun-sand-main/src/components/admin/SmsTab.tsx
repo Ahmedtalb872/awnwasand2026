@@ -107,7 +107,7 @@ export const SmsTab = ({ users = [] }: { users?: any[] }) => {
           </div>
           <div>
             <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{isRTL ? 'رابط (اختياري)' : 'URL (optional)'}</label>
-            <input type="url" value={url} onChange={e => setUrl(e.target.value)} className="input-field" placeholder="https://awnwasand.site/..." />
+            <input type="url" value={url} onChange={e => setUrl(e.target.value)} className="input-field" placeholder="https://example.com/..." />
           </div>
         </div>
 
