@@ -356,8 +356,8 @@ export const AdminPage = () => {
               {activeTab === 'competitions'  && <CompetitionsManagementTab />}
               {activeTab === 'mahaja'        && <MahajaTab />}
               {activeTab === 'admins'        && <AdminsTab />}
-              {activeTab === 'memberships'   && <MembershipsTab />}
-              {activeTab === 'user_donations'&& <UserDonationsTab />}
+              {activeTab === 'memberships'   && <MembershipsTab users={users} />}
+              {activeTab === 'user_donations'&& <UserDonationsTab users={users} />}
             </AnimatePresence>
           </div>
         </div>
