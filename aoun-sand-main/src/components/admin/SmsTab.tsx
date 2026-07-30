@@ -10,6 +10,12 @@ const parsePhones = (raw: string): string[] => {
   return [...new Set(found)];
 };
 
+const DONATION_NUMBER = '32203250';
+const DEFAULT_MESSAGES: Record<'ar' | 'fr', string> = {
+  ar: `تذكير من جمعية عون وسند: يرجى دفع رسوم الانتساب على الرقم ${DONATION_NUMBER}. جزاكم الله خيراً.`,
+  fr: `Rappel de l'association Awn Wa Sanad : merci de régler vos frais d'adhésion au numéro ${DONATION_NUMBER}.`,
+};
+
 export const SmsTab = ({ users = [] }: { users?: any[] }) => {
   const { language } = useLanguage();
   const isRTL = language === 'ar';
@@ -33,13 +39,13 @@ export const SmsTab = ({ users = [] }: { users?: any[] }) => {
     fetchLogs();
     fetchMemberships();
     const key = `sms_message_preview_${lang}`;
-    setMessagePreview(localStorage.getItem(key) || '');
+    setMessagePreview(localStorage.getItem(key) || DEFAULT_MESSAGES[lang]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     const key = `sms_message_preview_${lang}`;
-    setMessagePreview(localStorage.getItem(key) || '');
+    setMessagePreview(localStorage.getItem(key) || DEFAULT_MESSAGES[lang]);
   }, [lang]);
 
   const saveMessagePreview = (text: string) => {
@@ -171,8 +177,8 @@ export const SmsTab = ({ users = [] }: { users?: any[] }) => {
           <p className="text-xs text-amber-600 dark:text-amber-400 flex items-start gap-1.5 mt-2">
             <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
             {isRTL
-              ? 'هذا النص للمعاينة فقط ولا يُرسل من هنا — نص الرسالة الفعلي ثابت ومضبوط داخل حساب شينقيسوفت ولا يمكن تغييره من هذه الصفحة.'
-              : 'This is a preview only and is not transmitted — the actual message text is fixed inside your Chinguisoft account and cannot be changed from this page.'}
+              ? 'هذا النص للمعاينة فقط، لا يُرسل من هنا. لجعله فعلياً هو النص المُرسل، تواصل مع دعم شينقيسوفت واطلب منهم ضبط نص هذه الحملة بهذا النص بالضبط لكل لغة — لا يوجد إعداد بالموقع أو بحسابك يتيح تغييره غير ذلك.'
+              : 'Preview only — not transmitted from here. To make this the actual text sent, contact Chinguisoft support and ask them to set this campaign\'s message to this exact wording per language — there is no setting on this site or in your account that changes it otherwise.'}
           </p>
         </div>
 
