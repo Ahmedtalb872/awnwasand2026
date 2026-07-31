@@ -114,7 +114,7 @@ export const HomePage = () => {
       <div aria-hidden className="absolute top-0 left-0 right-0 h-[380px] sm:h-[420px] bg-[#1a1c4b] z-0 overflow-hidden">
         {/* Soft glows in background */}
         <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none" />
-        <div className="absolute top-20 right-10 w-64 h-64 rounded-full bg-teal-500/10 blur-3xl pointer-events-none" />
+        <div className="absolute top-20 right-10 w-64 h-64 rounded-full bg-secondary/10 blur-3xl pointer-events-none" />
         
         {/* Wave SVG matching the mockup */}
         <svg className="absolute bottom-0 left-0 right-0 w-full h-[60px] sm:h-[100px] text-slate-50 dark:text-slate-950 preserve-3d" preserveAspectRatio="none" viewBox="0 0 1440 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -130,7 +130,7 @@ export const HomePage = () => {
           className="text-center sm:text-start mb-8"
         >
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white/90 text-[11px] font-bold mb-4 backdrop-blur-sm shadow-sm">
-            <Sparkles className="w-3.5 h-3.5 text-teal-400" />
+            <Sparkles className="w-3.5 h-3.5 text-secondary" />
             <span>{isRTL ? 'منصة الأعضاء الرسمية' : 'Official Members Platform'}</span>
           </div>
 

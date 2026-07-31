@@ -41,13 +41,13 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950">
         <div className="relative w-24 h-24 flex items-center justify-center mb-8">
-          <div className="absolute inset-0 rounded-full border-t-4 border-indigo-600 dark:border-indigo-400 animate-spin opacity-75"></div>
-          <div className="absolute inset-2 rounded-full border-r-4 border-teal-500 dark:border-teal-400 animate-spin-slow opacity-75"></div>
-          <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center">
-            <div className="w-6 h-6 bg-gradient-to-br from-indigo-500 to-teal-400 rounded-full animate-pulse"></div>
+          <div className="absolute inset-0 rounded-full border-t-4 border-primary dark:border-primary-light animate-spin opacity-75"></div>
+          <div className="absolute inset-2 rounded-full border-r-4 border-secondary-dark dark:border-secondary animate-spin-slow opacity-75"></div>
+          <div className="w-12 h-12 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center">
+            <div className="w-6 h-6 bg-gradient-to-br from-primary to-secondary rounded-full animate-pulse"></div>
           </div>
         </div>
-        <h2 className="text-xl font-bold text-slate-800 dark:text-white bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-teal-500">
+        <h2 className="text-xl font-bold text-slate-800 dark:text-white bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary-dark">
           {isRTL ? 'جاري تجهيز بيئة العمل...' : 'Preparing workspace...'}
         </h2>
         <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">Please wait while we verify your session</p>

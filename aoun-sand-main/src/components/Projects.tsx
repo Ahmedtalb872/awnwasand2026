@@ -49,7 +49,7 @@ export const Projects = () => {
             <h2 className="section-title">
               {t.projects.title}
             </h2>
-            <div className="w-24 h-1 bg-teal-500 mx-auto rounded-full mt-4"></div>
+            <div className="w-24 h-1 bg-secondary-dark mx-auto rounded-full mt-4"></div>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">
@@ -64,7 +64,7 @@ export const Projects = () => {
                   <div className={`h-2 bg-gradient-to-r ${project.color}`}></div>
                   <div className="p-8">
                     <div className={`inline-flex p-4 rounded-2xl ${project.bgColor} mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                      <Icon className="w-8 h-8 text-teal-600 dark:text-teal-400" />
+                      <Icon className="w-8 h-8 text-primary dark:text-secondary" />
                     </div>
                     <h3 className="text-2xl font-bold mb-4 text-slate-800 dark:text-white">
                       {project.title}
@@ -88,7 +88,7 @@ export const Projects = () => {
                       ></iframe>
                       <div className="absolute inset-0 flex items-center justify-center z-20">
                         <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-110 transition-all duration-300">
-                          <Play className="w-5 h-5 text-teal-600 fill-current ml-1" />
+                          <Play className="w-5 h-5 text-primary fill-current ml-1" />
                         </div>
                       </div>
                     </div>
@@ -118,7 +118,7 @@ export const Projects = () => {
             </div>
             <button
               onClick={() => setLightboxVideo(null)}
-              className="absolute -top-12 right-0 text-white hover:text-teal-400 transition-colors p-2"
+              className="absolute -top-12 right-0 text-white hover:text-secondary transition-colors p-2"
             >
               <X className="w-8 h-8" />
             </button>

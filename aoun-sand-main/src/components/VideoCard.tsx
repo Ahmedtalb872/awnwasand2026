@@ -25,7 +25,7 @@ export const VideoCard = ({ title, date, duration, thumbnail, videoId }: VideoCa
                         <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
                             <button
                                 onClick={() => setIsPlaying(true)}
-                                className="w-16 h-16 flex items-center justify-center rounded-full bg-teal-600/90 text-white shadow-lg transform group-hover:scale-110 transition-all duration-300 hover:bg-teal-500"
+                                className="w-16 h-16 flex items-center justify-center rounded-full bg-primary/90 text-white shadow-lg transform group-hover:scale-110 transition-all duration-300 hover:bg-primary"
                             >
                                 <Play className="w-8 h-8 fill-current ml-1" />
                             </button>
@@ -51,7 +51,7 @@ export const VideoCard = ({ title, date, duration, thumbnail, videoId }: VideoCa
                     <Calendar className="w-4 h-4" />
                     <span>{date}</span>
                 </div>
-                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 leading-snug mb-2 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 leading-snug mb-2 group-hover:text-secondary-dark dark:group-hover:text-secondary transition-colors">
                     {title}
                 </h3>
             </div>

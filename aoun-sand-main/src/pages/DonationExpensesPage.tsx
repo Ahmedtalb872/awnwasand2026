@@ -131,9 +131,9 @@ export const DonationExpensesPage = () => {
   return (
     <div className="min-h-screen pt-24 pb-20 bg-slate-50 dark:bg-slate-900" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Page Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-teal-700 via-teal-600 to-emerald-600 py-16 mb-10">
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-secondary-dark py-16 mb-10">
         <div className="absolute -top-16 -end-16 w-64 h-64 rounded-full bg-white/10 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 start-0 w-48 h-48 rounded-full bg-emerald-400/20 blur-2xl pointer-events-none" />
+        <div className="absolute bottom-0 start-0 w-48 h-48 rounded-full bg-secondary/20 blur-2xl pointer-events-none" />
         <div className="container-custom relative z-10 text-center">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-white/15 backdrop-blur-sm rounded-2xl border border-white/20 shadow-xl mb-6 text-white">
             <Activity className="w-10 h-10" />
@@ -141,7 +141,7 @@ export const DonationExpensesPage = () => {
           <h1 className="text-4xl md:text-5xl font-black text-white mb-4">
             {isRTL ? 'مصاريف التبرعات' : 'Donation Expenses'}
           </h1>
-          <p className="text-teal-100/80 text-lg max-w-2xl mx-auto">
+          <p className="text-white/70 text-lg max-w-2xl mx-auto">
             {isRTL
               ? 'سجل شفاف يوضح كيف يتم إنفاق تبرعاتكم الكريمة في أوجه الخير والبر المختلفة'
               : 'A transparent record showing how your generous donations are spent on various good causes'}
@@ -175,7 +175,7 @@ export const DonationExpensesPage = () => {
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               placeholder={isRTL ? 'ابحث في المصاريف...' : 'Search expenses...'}
-              className={`w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl py-2.5 text-sm outline-none focus:ring-2 focus:ring-teal-500 ${isRTL ? 'pr-9 pl-4' : 'pl-9 pr-4'}`}
+              className={`w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl py-2.5 text-sm outline-none focus:ring-2 focus:ring-secondary-dark ${isRTL ? 'pr-9 pl-4' : 'pl-9 pr-4'}`}
             />
             {searchTerm && (
               <button onClick={() => setSearchTerm('')} className={`absolute top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 ${isRTL ? 'left-3' : 'right-3'}`}>
@@ -187,7 +187,7 @@ export const DonationExpensesPage = () => {
           <button
             onClick={handleDownloadPDF}
             disabled={downloadingPDF || filteredExpenses.length === 0}
-            className="flex items-center gap-2 px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-bold text-sm transition-colors shadow-sm disabled:opacity-60 shrink-0"
+            className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-xl font-bold text-sm transition-colors shadow-sm disabled:opacity-60 shrink-0"
           >
             {downloadingPDF
               ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -235,15 +235,15 @@ export const DonationExpensesPage = () => {
                 className="group bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden"
               >
                 {/* Top accent bar */}
-                <div className="h-1 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-t-2xl" />
+                <div className="h-1 bg-gradient-to-r from-primary to-secondary-dark rounded-t-2xl" />
 
                 <div className="p-6 flex flex-col flex-1">
                   {/* Header row */}
                   <div className="flex items-start justify-between gap-3 mb-4">
-                    <div className="w-12 h-12 bg-teal-50 dark:bg-teal-900/30 rounded-xl flex items-center justify-center shrink-0">
-                      <HandHeart className="w-6 h-6 text-teal-600 dark:text-teal-400" />
+                    <div className="w-12 h-12 bg-secondary/10 dark:bg-secondary/10 rounded-xl flex items-center justify-center shrink-0">
+                      <HandHeart className="w-6 h-6 text-secondary-dark dark:text-secondary" />
                     </div>
-                    <span className="font-black text-lg text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/20 px-3 py-1 rounded-full whitespace-nowrap">
+                    <span className="font-black text-lg text-secondary-dark dark:text-secondary bg-secondary/10 dark:bg-secondary/10 px-3 py-1 rounded-full whitespace-nowrap">
                       {Number(expense.amount).toLocaleString()} MRU
                     </span>
                   </div>
@@ -296,7 +296,7 @@ export const DonationExpensesPage = () => {
                           href={expense.invoice_url}
                           target="_blank"
                           rel="noreferrer"
-                          className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-slate-50 dark:bg-slate-700 hover:bg-teal-50 dark:hover:bg-teal-900/20 text-slate-600 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400 rounded-xl text-xs font-bold transition-colors"
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-slate-50 dark:bg-slate-700 hover:bg-secondary/10 dark:hover:bg-secondary/10 text-slate-600 dark:text-slate-300 hover:text-secondary-dark dark:hover:text-secondary rounded-xl text-xs font-bold transition-colors"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
                           {isRTL ? 'عرض الإيصال' : 'View Receipt'}

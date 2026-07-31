@@ -34,7 +34,7 @@ export const About = () => {
             <h2 className="section-title">
               {t.about.title || "عن جمعية عون وسند"}
             </h2>
-            <div className="w-24 h-1 bg-teal-500 mx-auto rounded-full mt-4"></div>
+            <div className="w-24 h-1 bg-secondary-dark mx-auto rounded-full mt-4"></div>
           </div>
 
           {/* Description & Video */}
@@ -60,7 +60,7 @@ export const About = () => {
 
             {/* Goals */}
             <div>
-              <h3 className="text-2xl font-bold mb-8 text-teal-600 dark:text-teal-400 flex items-center gap-3">
+              <h3 className="text-2xl font-bold mb-8 text-primary dark:text-secondary flex items-center gap-3">
                 <Target className="w-8 h-8" />
                 أهداف الجمعية
               </h3>
@@ -68,9 +68,9 @@ export const About = () => {
                 {t.about.goals.map((goal, index) => (
                   <div
                     key={index}
-                    className="flex items-start gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl hover:bg-teal-50 dark:hover:bg-teal-900/20 transition-all duration-300 transform hover:translate-x-2 border border-slate-100 dark:border-slate-700"
+                    className="flex items-start gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl hover:bg-secondary/10 dark:hover:bg-secondary/10 transition-all duration-300 transform hover:translate-x-2 border border-slate-100 dark:border-slate-700"
                   >
-                    <div className="flex-shrink-0 w-8 h-8 bg-teal-500 text-white rounded-full flex items-center justify-center font-bold shadow-md">
+                    <div className="flex-shrink-0 w-8 h-8 bg-secondary-dark text-white rounded-full flex items-center justify-center font-bold shadow-md">
                       {index + 1}
                     </div>
                     <p className="text-slate-700 dark:text-slate-300 pt-1">
@@ -83,10 +83,10 @@ export const About = () => {
           </div>
 
           {/* Team Section */}
-          <div className={`bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-slate-800 dark:to-slate-800/50 rounded-3xl p-8 md:p-12 shadow-lg mt-20 border border-teal-100 dark:border-slate-700 transition-all duration-700 ${sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+          <div className={`bg-gradient-to-br from-secondary/10 to-secondary/5 dark:from-slate-800 dark:to-slate-800/50 rounded-3xl p-8 md:p-12 shadow-lg mt-20 border border-secondary/20 dark:border-slate-700 transition-all duration-700 ${sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
             <div className="flex flex-col md:flex-row items-center gap-8">
               <div className="flex-shrink-0 bg-white dark:bg-slate-700 p-4 rounded-full shadow-lg">
-                <Users className="w-12 h-12 text-teal-600 dark:text-teal-400" />
+                <Users className="w-12 h-12 text-primary dark:text-secondary" />
               </div>
               <div>
                 <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-4">
