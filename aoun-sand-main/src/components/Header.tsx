@@ -139,7 +139,7 @@ export const Header = () => {
           {isHomePage && userProfile && (
             <button
               onClick={() => setIsCardModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold text-sm transition-all shadow-sm border border-rose-200"
+              className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-gradient-to-r from-rose-100 to-rose-50 hover:from-rose-200 hover:to-rose-100 dark:from-rose-900/30 dark:to-rose-800/30 text-rose-700 dark:text-rose-300 font-bold text-sm transition-all shadow-sm border border-rose-200 dark:border-rose-800/50"
             >
               <CreditCard className="w-4 h-4 sm:w-5 sm:h-5" />
               <span>{isRTL ? 'بطاقتي' : 'My Card'}</span>

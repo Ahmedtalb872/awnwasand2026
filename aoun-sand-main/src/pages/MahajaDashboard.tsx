@@ -34,8 +34,9 @@ const getYoutubeVideoId = (url: string) => {
 
 export const MahajaDashboard = () => {
   const { language } = useLanguage();
-  const { logout } = useAuth();
+  const { logout, userProfile } = useAuth();
   const isRTL = language === 'ar';
+  const isMahajaUser = userProfile?.is_mahaja === true;
 
   const [courses, setCourses] = useState<MahajaCourse[]>([]);
   const [books, setBooks] = useState<MahajaBook[]>([]);
@@ -104,17 +105,19 @@ export const MahajaDashboard = () => {
         </div>
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 text-center">
-          {/* Logout Button */}
-          <div className={`absolute top-4 ${isRTL ? 'left-4' : 'right-4'}`}>
-            <button
-              onClick={logout}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all"
-              style={{ background: 'rgba(201,164,184,0.12)', color: '#c9a4b8', border: '1px solid rgba(201,164,184,0.25)' }}
-            >
-              <LogOut className="w-4 h-4" />
-              {isRTL ? 'تسجيل الخروج' : 'Logout'}
-            </button>
-          </div>
+          {/* Logout Button — only shown when the app chrome (Header) is hidden for Mahaja-only users */}
+          {isMahajaUser && (
+            <div className={`absolute top-4 ${isRTL ? 'left-4' : 'right-4'}`}>
+              <button
+                onClick={logout}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all"
+                style={{ background: 'rgba(201,164,184,0.12)', color: '#c9a4b8', border: '1px solid rgba(201,164,184,0.25)' }}
+              >
+                <LogOut className="w-4 h-4" />
+                {isRTL ? 'تسجيل الخروج' : 'Logout'}
+              </button>
+            </div>
+          )}
 
           {/* Logo */}
           <motion.div

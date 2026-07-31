@@ -7,7 +7,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import {
   Users, TrendingUp, Sparkles,
   BookOpen, Video, Info, Heart, ArrowLeft, ArrowRight,
-  CheckCircle2, Bell, Receipt, Trophy, CreditCard, ChevronLeft, ChevronRight
+  CheckCircle2, Bell, Receipt, Trophy, CreditCard, ChevronLeft, ChevronRight, Phone
 } from 'lucide-react';
 import { PollsSection } from '../components/PollsSection';
 import { MembershipFeeModal } from '../components/MembershipFeeModal';
@@ -177,6 +177,28 @@ export const HomePage = () => {
               <div>
                 <h3 className="font-black text-white text-sm leading-tight">{isRTL ? 'تبرع الآن' : 'Donate Now'}</h3>
                 <p className="text-[10px] text-rose-100 font-medium leading-tight mt-0.5">{isRTL ? 'شارك في العطاء' : 'Give back'}</p>
+              </div>
+            </Link>
+
+            {/* Lessons Card */}
+            <Link to="/lessons" className="flex items-center gap-3 bg-white dark:bg-slate-800 rounded-[2rem] p-4 sm:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:-translate-y-1 transition-transform border border-slate-100 dark:border-slate-700/50">
+              <div className="w-10 h-10 rounded-full bg-violet-50 dark:bg-violet-900/30 flex items-center justify-center shrink-0">
+                <Video className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+              </div>
+              <div>
+                <h3 className="font-black text-slate-800 dark:text-white text-sm leading-tight">{isRTL ? 'الدروس' : 'Lessons'}</h3>
+                <p className="text-[10px] text-slate-400 font-medium leading-tight mt-0.5">{isRTL ? 'سلسلة الدروس العلمية' : 'Educational series'}</p>
+              </div>
+            </Link>
+
+            {/* Contact Card */}
+            <Link to="/contact" className="flex items-center gap-3 bg-white dark:bg-slate-800 rounded-[2rem] p-4 sm:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:-translate-y-1 transition-transform border border-slate-100 dark:border-slate-700/50">
+              <div className="w-10 h-10 rounded-full bg-sky-50 dark:bg-sky-900/30 flex items-center justify-center shrink-0">
+                <Phone className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+              </div>
+              <div>
+                <h3 className="font-black text-slate-800 dark:text-white text-sm leading-tight">{isRTL ? 'اتصل بنا' : 'Contact Us'}</h3>
+                <p className="text-[10px] text-slate-400 font-medium leading-tight mt-0.5">{isRTL ? 'نحن هنا لمساعدتك' : "We're here to help"}</p>
               </div>
             </Link>
           </div>

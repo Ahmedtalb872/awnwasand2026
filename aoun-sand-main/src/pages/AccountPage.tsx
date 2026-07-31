@@ -27,7 +27,11 @@ export const AccountPage = () => {
   return (
     <div className="min-h-screen pt-20 pb-24 px-4 bg-slate-50 dark:bg-slate-900" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="max-w-md mx-auto space-y-6">
-        <motion.div 
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-white px-1">
+          {isRTL ? 'الحساب' : 'My Account'}
+        </h1>
+
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-6 text-center"
