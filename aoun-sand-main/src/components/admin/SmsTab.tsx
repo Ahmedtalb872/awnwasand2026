@@ -57,6 +57,7 @@ export const SmsTab = ({ users = [] }: { users?: any[] }) => {
   const [selectedContactIds, setSelectedContactIds] = useState<Set<string>>(new Set());
   const [newContactsRaw, setNewContactsRaw] = useState('');
   const [isAddingContacts, setIsAddingContacts] = useState(false);
+  const [contactSearch, setContactSearch] = useState('');
 
   useEffect(() => {
     fetchLogs();
@@ -157,6 +158,23 @@ export const SmsTab = ({ users = [] }: { users?: any[] }) => {
     }
   };
 
+  const handleToggleContactPaid = async (id: string, currentPaid: boolean) => {
+    if (!adminId) return;
+    const nextPaid = !currentPaid;
+    // Optimistic update
+    setContacts(prev => prev.map(c => c.id === id ? { ...c, paid: nextPaid } : c));
+    if (nextPaid) setSelectedContactIds(prev => { const next = new Set(prev); next.delete(id); return next; });
+    try {
+      const { data, error } = await supabase.rpc('admin_set_sms_contact_paid', { p_admin_id: adminId, p_id: id, p_paid: nextPaid });
+      if (error) throw error;
+      if (data?.success === false) throw new Error(data.message);
+    } catch (err: any) {
+      // Revert on failure
+      setContacts(prev => prev.map(c => c.id === id ? { ...c, paid: currentPaid } : c));
+      toast.error(err.message || (isRTL ? 'فشل تحديث حالة الدفع' : 'Failed to update paid status'));
+    }
+  };
+
   const toggleContact = (id: string) => {
     setSelectedContactIds(prev => {
       const next = new Set(prev);
@@ -165,7 +183,21 @@ export const SmsTab = ({ users = [] }: { users?: any[] }) => {
     });
   };
 
-  const selectAllContacts = () => setSelectedContactIds(new Set(contacts.map(c => c.id)));
+  const filteredContacts = useMemo(() => {
+    const q = contactSearch.trim().toLowerCase();
+    if (!q) return contacts;
+    return contacts.filter(c =>
+      c.name?.toLowerCase().includes(q) || c.phone?.includes(q)
+    );
+  }, [contacts, contactSearch]);
+
+  const selectAllUnpaidContacts = () => {
+    setSelectedContactIds(prev => {
+      const next = new Set(prev);
+      filteredContacts.forEach(c => { if (!c.paid) next.add(c.id); });
+      return next;
+    });
+  };
   const clearContactSelection = () => setSelectedContactIds(new Set());
 
   const membersWithPhone = useMemo(() => users.filter(u => u.phone), [users]);
@@ -340,8 +372,8 @@ export const SmsTab = ({ users = [] }: { users?: any[] }) => {
               {isRTL ? 'قائمة أرقام محفوظة' : 'Saved contacts list'}
             </label>
             <div className="flex items-center gap-2">
-              <button onClick={selectAllContacts} className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
-                {isRTL ? 'تحديد الكل' : 'Select all'}
+              <button onClick={selectAllUnpaidContacts} className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+                {isRTL ? 'تحديد كل من لم يدفع' : 'Select all unpaid'}
               </button>
               <button onClick={clearContactSelection} className="text-xs font-bold text-slate-500 hover:underline">
                 {isRTL ? 'إلغاء التحديد' : 'Clear'}
@@ -349,17 +381,27 @@ export const SmsTab = ({ users = [] }: { users?: any[] }) => {
             </div>
           </div>
 
+          <div className="relative mb-2">
+            <Search className="absolute top-1/2 -translate-y-1/2 start-3 w-4 h-4 text-slate-400" />
+            <input
+              type="text" value={contactSearch} onChange={e => setContactSearch(e.target.value)}
+              className="input-field ps-9"
+              placeholder={isRTL ? 'ابحث بالاسم أو الهاتف...' : 'Search name or phone...'}
+            />
+          </div>
+
           {loadingContacts ? (
             <div className="flex justify-center py-6"><div className="w-6 h-6 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin" /></div>
           ) : (
             <div className="max-h-72 overflow-y-auto border border-slate-200 dark:border-slate-700 rounded-xl divide-y divide-slate-100 dark:divide-slate-800 mb-3">
-              {contacts.length === 0 ? (
+              {filteredContacts.length === 0 ? (
                 <div className="text-center py-6 text-slate-400 text-sm">{isRTL ? 'لا توجد أرقام محفوظة بعد' : 'No saved contacts yet'}</div>
-              ) : contacts.map(c => (
-                <div key={c.id} className="flex items-center gap-3 p-3 hover:bg-slate-50 dark:hover:bg-slate-800">
+              ) : filteredContacts.map(c => (
+                <div key={c.id} className={`flex items-center gap-3 p-3 ${c.paid ? 'opacity-60' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
                   <input
                     type="checkbox"
                     checked={selectedContactIds.has(c.id)}
+                    disabled={c.paid}
                     onChange={() => toggleContact(c.id)}
                     className="w-4 h-4"
                   />
@@ -367,6 +409,18 @@ export const SmsTab = ({ users = [] }: { users?: any[] }) => {
                     {c.name || (isRTL ? 'بدون اسم' : 'No name')}
                   </span>
                   <span className="font-mono text-xs text-slate-400">{c.phone}</span>
+                  <button
+                    onClick={() => handleToggleContactPaid(c.id, c.paid)}
+                    className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full shrink-0 transition-colors ${
+                      c.paid
+                        ? 'text-emerald-700 bg-emerald-100 hover:bg-emerald-200'
+                        : 'text-amber-700 bg-amber-100 hover:bg-amber-200'
+                    }`}
+                    title={isRTL ? 'اضغط لتغيير حالة الدفع' : 'Click to toggle paid status'}
+                  >
+                    {c.paid && <CheckCircle className="w-3 h-3" />}
+                    {c.paid ? (isRTL ? 'تم الدفع' : 'Paid') : (isRTL ? 'لم يدفع' : 'Unpaid')}
+                  </button>
                   <button
                     onClick={() => handleDeleteContact(c.id)}
                     className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg shrink-0"
@@ -399,8 +453,8 @@ export const SmsTab = ({ users = [] }: { users?: any[] }) => {
           </div>
           <p className="text-xs text-slate-400 mt-2">
             {isRTL
-              ? `${selectedContactIds.size} رقم محدد من القائمة المحفوظة · تُحفظ هذه الأرقام دائماً، وتبقى جاهزة للاختيار في أي إرسال قادم.`
-              : `${selectedContactIds.size} selected from the saved list · these numbers are kept permanently and stay ready to pick for any future send.`}
+              ? `${selectedContactIds.size} رقم محدد من القائمة المحفوظة · اضغط على "لم يدفع" بجانب أي رقم لتعليمه كـ"تم الدفع" فلا يعود يُمكن تحديده لإرسال آخر.`
+              : `${selectedContactIds.size} selected from the saved list · click "Unpaid" next to a number to mark it "Paid", after which it can no longer be selected for another send.`}
           </p>
         </div>
 
