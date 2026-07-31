@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { Header } from './components/Header';
-import { BottomNav } from './components/BottomNav';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { HomePage } from './pages/HomePage';
 import { AboutPage } from './pages/AboutPage';
@@ -155,7 +154,7 @@ const AppContent = () => {
       {!isShellHidden && <PWAInstallPrompt />}
       {!isShellHidden && <Header />}
       {!isShellHidden && <NotificationsModal />}
-      <main className={`flex-1 ${!isShellHidden ? 'pb-16' : ''}`}>
+      <main className="flex-1">
         <Routes>
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/admin" element={<AdminPage />} />
@@ -175,7 +174,6 @@ const AppContent = () => {
           <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
         </Routes>
       </main>
-      {!isShellHidden && <BottomNav />}
     </div>
   );
 };
