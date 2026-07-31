@@ -62,7 +62,7 @@ export const Contact = () => {
                   className="flex items-center gap-4 p-6 bg-white dark:bg-slate-900 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-fadeIn"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-full flex items-center justify-center shadow-lg">
+                  <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary to-secondary-dark rounded-full flex items-center justify-center shadow-lg">
                     <Icon className="w-6 h-6 text-white" />
                   </div>
                   <p className={`text-gray-700 dark:text-gray-300 font-medium ${language === 'ar' ? 'font-arabic text-right flex-1' : ''}`}>

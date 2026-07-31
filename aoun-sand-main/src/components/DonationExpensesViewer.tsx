@@ -57,7 +57,7 @@ export const DonationExpensesViewer = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="w-8 h-8 border-4 border-teal-500/30 border-t-teal-500 rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-secondary-dark/30 border-t-secondary-dark rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -70,7 +70,7 @@ export const DonationExpensesViewer = () => {
     <div className="mt-16 w-full max-w-5xl mx-auto px-4" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="text-center mb-10">
         <h3 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white mb-3 flex items-center justify-center gap-3">
-          <Activity className="w-8 h-8 text-teal-500" />
+          <Activity className="w-8 h-8 text-primary" />
           {isRTL ? 'أين تذهب تبرعاتكم؟' : 'Where Do Your Donations Go?'}
         </h3>
         <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
@@ -90,10 +90,10 @@ export const DonationExpensesViewer = () => {
             className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm hover:shadow-md border border-slate-100 dark:border-slate-700 p-6 flex flex-col transition-all duration-300"
           >
             <div className="flex justify-between items-start mb-4">
-              <div className="w-12 h-12 bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 rounded-xl flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 bg-secondary/10 dark:bg-secondary/10 text-secondary-dark dark:text-secondary rounded-xl flex items-center justify-center shrink-0">
                 <HandHeart className="w-6 h-6" />
               </div>
-              <span className="font-black text-lg text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/20 px-3 py-1 rounded-full">
+              <span className="font-black text-lg text-secondary-dark dark:text-secondary bg-secondary/10 dark:bg-secondary/10 px-3 py-1 rounded-full">
                 {Number(expense.amount).toLocaleString()} MRU
               </span>
             </div>

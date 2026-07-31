@@ -26,9 +26,7 @@ export const BottomNav = () => {
           dir={isRTL ? 'rtl' : 'ltr'}
         >
         {navItems.map((item) => {
-          const isActive =
-            location.pathname === item.path ||
-            (item.path === '/account' && location.pathname === '/admin');
+          const isActive = location.pathname === item.path;
 
           return (
             <Link

@@ -130,7 +130,7 @@ export const Donation = () => {
   return (
     <section
       id="donate"
-      className="py-16 bg-gradient-to-br from-slate-50 via-rose-50/40 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors duration-300 min-h-screen"
+      className="pt-24 pb-16 bg-gradient-to-br from-slate-50 via-rose-50/40 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors duration-300 min-h-screen"
     >
       <div className="container mx-auto px-4">
         <div className="max-w-5xl mx-auto">

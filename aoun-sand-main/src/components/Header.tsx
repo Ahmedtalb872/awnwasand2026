@@ -113,7 +113,7 @@ export const Header = () => {
                   className="h-9 w-9 object-cover transform group-hover:scale-110 transition-transform duration-500"
                 />
               </div>
-              <span className="text-base font-black bg-gradient-to-r from-indigo-600 to-teal-600 dark:from-indigo-400 dark:to-teal-400 bg-clip-text text-transparent hidden sm:block">
+              <span className="text-base font-black bg-gradient-to-r from-primary to-secondary-dark dark:from-primary-light dark:to-secondary bg-clip-text text-transparent hidden sm:block">
                 {brandName}
               </span>
             </Link>
@@ -128,7 +128,7 @@ export const Header = () => {
                 : "hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 text-slate-600 dark:text-slate-300 text-sm font-medium transition-colors"
               }
             >
-              <div className={isHomePage ? "w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-teal-500 flex items-center justify-center text-white text-sm font-bold" : "w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-teal-500 flex items-center justify-center text-white text-xs font-bold shrink-0"}>
+              <div className={isHomePage ? "w-9 h-9 rounded-full bg-gradient-to-br from-primary to-secondary-dark flex items-center justify-center text-white text-sm font-bold" : "w-6 h-6 rounded-full bg-gradient-to-br from-primary to-secondary-dark flex items-center justify-center text-white text-xs font-bold shrink-0"}>
                 {userProfile.full_name.charAt(0)}
               </div>
               {!isHomePage && <span className="max-w-[120px] truncate">{userProfile.full_name}</span>}
@@ -139,7 +139,7 @@ export const Header = () => {
           {isHomePage && userProfile && (
             <button
               onClick={() => setIsCardModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold text-sm transition-all shadow-sm border border-rose-200"
+              className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-gradient-to-r from-rose-100 to-rose-50 hover:from-rose-200 hover:to-rose-100 dark:from-rose-900/30 dark:to-rose-800/30 text-rose-700 dark:text-rose-300 font-bold text-sm transition-all shadow-sm border border-rose-200 dark:border-rose-800/50"
             >
               <CreditCard className="w-4 h-4 sm:w-5 sm:h-5" />
               <span>{isRTL ? 'بطاقتي' : 'My Card'}</span>

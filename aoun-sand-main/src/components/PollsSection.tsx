@@ -27,7 +27,7 @@ const PollBar = ({
     transition={{ duration: 0.9, ease: 'easeOut', delay }}
     className={`absolute inset-y-0 start-0 rounded-2xl ${
       isChosen
-        ? 'bg-gradient-to-r from-teal-100 to-emerald-100 dark:from-teal-900/50 dark:to-emerald-900/40'
+        ? 'bg-gradient-to-r from-secondary/30 to-secondary/20 dark:from-secondary/20 dark:to-secondary/10'
         : isLeading
         ? 'bg-indigo-50 dark:bg-indigo-900/30'
         : 'bg-slate-100 dark:bg-slate-800/60'
@@ -172,7 +172,7 @@ export const PollsSection = () => {
       >
         <div className="flex items-center gap-3">
           <div className="relative">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-teal-500/30">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary to-secondary-dark flex items-center justify-center shadow-lg shadow-primary/30">
               <BarChart2 className="w-5 h-5 text-white" />
             </div>
             <span className="absolute -top-1 -end-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white dark:border-slate-950 animate-pulse" />
@@ -232,7 +232,7 @@ export const PollsSection = () => {
               <div className="px-5 pt-5 pb-4">
                 {/* Poll title row */}
                 <div className="flex items-start gap-3 mb-5">
-                  <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center shrink-0 shadow-sm shadow-teal-500/25 mt-0.5">
+                  <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-primary to-secondary-dark flex items-center justify-center shrink-0 shadow-sm shadow-primary/25 mt-0.5">
                     <BarChart2 className="w-4 h-4 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -269,8 +269,8 @@ export const PollsSection = () => {
                             id={`poll-${poll.id}-opt-${opt.id}`}
                             className={`w-full text-start flex items-center gap-3 px-4 py-3.5 rounded-2xl border-2 transition-all duration-150 disabled:opacity-60 group
                               ${isSelected
-                                ? 'border-teal-400 dark:border-teal-500 bg-teal-50/60 dark:bg-teal-900/20'
-                                : 'border-slate-200 dark:border-slate-700 bg-transparent hover:border-teal-300 dark:hover:border-teal-600 hover:bg-teal-50/40 dark:hover:bg-teal-900/10'
+                                ? 'border-secondary-dark dark:border-secondary bg-secondary/10 dark:bg-secondary/10'
+                                : 'border-slate-200 dark:border-slate-700 bg-transparent hover:border-secondary dark:hover:border-secondary-dark hover:bg-secondary/5 dark:hover:bg-secondary/10'
                               }`}
                           >
                             {/* Indicator */}
@@ -279,8 +279,8 @@ export const PollsSection = () => {
                                 allowMultiple ? 'rounded-md' : 'rounded-full'
                               } ${
                                 isSelected
-                                  ? 'border-teal-500 bg-teal-500'
-                                  : 'border-slate-300 dark:border-slate-600 group-hover:border-teal-400 dark:group-hover:border-teal-500'
+                                  ? 'border-secondary-dark bg-secondary-dark'
+                                  : 'border-slate-300 dark:border-slate-600 group-hover:border-secondary dark:group-hover:border-secondary-dark'
                               }`}
                             >
                               {allowMultiple ? (
@@ -288,7 +288,7 @@ export const PollsSection = () => {
                               ) : (
                                 <div
                                   className={`w-2.5 h-2.5 rounded-full transition-all ${
-                                    isSelected ? 'bg-white' : 'bg-transparent group-hover:bg-teal-400/50'
+                                    isSelected ? 'bg-white' : 'bg-transparent group-hover:bg-secondary/50'
                                   }`}
                                 />
                               )}
@@ -297,8 +297,8 @@ export const PollsSection = () => {
                             <span
                               className={`text-sm sm:text-base font-semibold flex-1 transition-colors ${
                                 isSelected
-                                  ? 'text-teal-700 dark:text-teal-300'
-                                  : 'text-slate-700 dark:text-slate-200 group-hover:text-teal-700 dark:group-hover:text-teal-300'
+                                  ? 'text-primary dark:text-secondary'
+                                  : 'text-slate-700 dark:text-slate-200 group-hover:text-primary dark:group-hover:text-secondary'
                               }`}
                             >
                               {opt.option_text}
@@ -309,15 +309,15 @@ export const PollsSection = () => {
                               <ChevronRight
                                 className={`w-4 h-4 shrink-0 transition-all ${
                                   isSelected
-                                    ? 'text-teal-500 translate-x-0.5'
-                                    : 'text-slate-300 dark:text-slate-600 group-hover:text-teal-400 group-hover:translate-x-0.5'
+                                    ? 'text-secondary-dark translate-x-0.5'
+                                    : 'text-slate-300 dark:text-slate-600 group-hover:text-secondary group-hover:translate-x-0.5'
                                 } ${isRTL ? 'rotate-180' : ''}`}
                               />
                             )}
 
                             {/* Spinner for submitting single */}
                             {!allowMultiple && isSubmittingThis && idx === 0 && (
-                              <div className="ms-auto w-4 h-4 border-2 border-teal-400/40 border-t-teal-500 rounded-full animate-spin shrink-0" />
+                              <div className="ms-auto w-4 h-4 border-2 border-secondary/40 border-t-secondary-dark rounded-full animate-spin shrink-0" />
                             )}
                           </motion.button>
                         ) : (
@@ -325,7 +325,7 @@ export const PollsSection = () => {
                           <div
                             className={`relative overflow-hidden rounded-2xl border-2 px-4 py-3.5 transition-all ${
                               isChosen
-                                ? 'border-teal-400 dark:border-teal-600'
+                                ? 'border-secondary dark:border-secondary-dark'
                                 : isLeading
                                 ? 'border-indigo-200 dark:border-indigo-800'
                                 : 'border-slate-100 dark:border-slate-800'
@@ -345,7 +345,7 @@ export const PollsSection = () => {
                                     allowMultiple ? 'rounded-md' : 'rounded-full'
                                   } ${
                                     isChosen
-                                      ? 'border-teal-500 bg-teal-500'
+                                      ? 'border-secondary-dark bg-secondary-dark'
                                       : 'border-slate-300 dark:border-slate-600'
                                   }`}
                                 >
@@ -355,7 +355,7 @@ export const PollsSection = () => {
                                 <span
                                   className={`text-sm sm:text-base font-semibold truncate ${
                                     isChosen
-                                      ? 'text-teal-700 dark:text-teal-300'
+                                      ? 'text-primary dark:text-secondary'
                                       : 'text-slate-600 dark:text-slate-300'
                                   }`}
                                 >
@@ -376,7 +376,7 @@ export const PollsSection = () => {
                                 <span
                                   className={`text-sm font-black tabular-nums ${
                                     isChosen
-                                      ? 'text-teal-600 dark:text-teal-400'
+                                      ? 'text-secondary-dark dark:text-secondary'
                                       : isLeading
                                       ? 'text-indigo-600 dark:text-indigo-400'
                                       : 'text-slate-500 dark:text-slate-400'
@@ -414,7 +414,7 @@ export const PollsSection = () => {
                       whileTap={{ scale: 0.95 }}
                       onClick={() => handleMultipleSubmit(poll.id)}
                       disabled={isSubmittingThis}
-                      className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white text-xs font-black rounded-xl transition-all shadow-md shadow-teal-500/20 disabled:opacity-50"
+                      className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-primary to-secondary-dark hover:from-primary-dark hover:to-secondary text-white text-xs font-black rounded-xl transition-all shadow-md shadow-primary/20 disabled:opacity-50"
                     >
                       {isSubmittingThis ? (
                         <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
@@ -445,7 +445,7 @@ export const PollsSection = () => {
                       {isRTL ? 'سجّل للتصويت' : 'Login to vote'}
                     </div>
                   ) : hasVoted ? (
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-teal-600 dark:text-teal-400">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-secondary-dark dark:text-secondary">
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       {isRTL ? 'تم التصويت ✓' : 'Voted ✓'}
                     </div>

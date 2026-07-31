@@ -7,7 +7,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import {
   Users, TrendingUp, Sparkles,
   BookOpen, Video, Info, Heart, ArrowLeft, ArrowRight,
-  CheckCircle2, Bell, Receipt, Trophy, CreditCard, ChevronLeft, ChevronRight
+  CheckCircle2, Bell, Receipt, Trophy, CreditCard, ChevronLeft, ChevronRight, Phone
 } from 'lucide-react';
 import { PollsSection } from '../components/PollsSection';
 import { MembershipFeeModal } from '../components/MembershipFeeModal';
@@ -114,7 +114,7 @@ export const HomePage = () => {
       <div aria-hidden className="absolute top-0 left-0 right-0 h-[380px] sm:h-[420px] bg-[#1a1c4b] z-0 overflow-hidden">
         {/* Soft glows in background */}
         <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none" />
-        <div className="absolute top-20 right-10 w-64 h-64 rounded-full bg-teal-500/10 blur-3xl pointer-events-none" />
+        <div className="absolute top-20 right-10 w-64 h-64 rounded-full bg-secondary/10 blur-3xl pointer-events-none" />
         
         {/* Wave SVG matching the mockup */}
         <svg className="absolute bottom-0 left-0 right-0 w-full h-[60px] sm:h-[100px] text-slate-50 dark:text-slate-950 preserve-3d" preserveAspectRatio="none" viewBox="0 0 1440 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -130,7 +130,7 @@ export const HomePage = () => {
           className="text-center sm:text-start mb-8"
         >
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white/90 text-[11px] font-bold mb-4 backdrop-blur-sm shadow-sm">
-            <Sparkles className="w-3.5 h-3.5 text-teal-400" />
+            <Sparkles className="w-3.5 h-3.5 text-secondary" />
             <span>{isRTL ? 'منصة الأعضاء الرسمية' : 'Official Members Platform'}</span>
           </div>
 
@@ -177,6 +177,28 @@ export const HomePage = () => {
               <div>
                 <h3 className="font-black text-white text-sm leading-tight">{isRTL ? 'تبرع الآن' : 'Donate Now'}</h3>
                 <p className="text-[10px] text-rose-100 font-medium leading-tight mt-0.5">{isRTL ? 'شارك في العطاء' : 'Give back'}</p>
+              </div>
+            </Link>
+
+            {/* Lessons Card */}
+            <Link to="/lessons" className="flex items-center gap-3 bg-white dark:bg-slate-800 rounded-[2rem] p-4 sm:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:-translate-y-1 transition-transform border border-slate-100 dark:border-slate-700/50">
+              <div className="w-10 h-10 rounded-full bg-violet-50 dark:bg-violet-900/30 flex items-center justify-center shrink-0">
+                <Video className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+              </div>
+              <div>
+                <h3 className="font-black text-slate-800 dark:text-white text-sm leading-tight">{isRTL ? 'الدروس' : 'Lessons'}</h3>
+                <p className="text-[10px] text-slate-400 font-medium leading-tight mt-0.5">{isRTL ? 'سلسلة الدروس العلمية' : 'Educational series'}</p>
+              </div>
+            </Link>
+
+            {/* Contact Card */}
+            <Link to="/contact" className="flex items-center gap-3 bg-white dark:bg-slate-800 rounded-[2rem] p-4 sm:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:-translate-y-1 transition-transform border border-slate-100 dark:border-slate-700/50">
+              <div className="w-10 h-10 rounded-full bg-sky-50 dark:bg-sky-900/30 flex items-center justify-center shrink-0">
+                <Phone className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+              </div>
+              <div>
+                <h3 className="font-black text-slate-800 dark:text-white text-sm leading-tight">{isRTL ? 'اتصل بنا' : 'Contact Us'}</h3>
+                <p className="text-[10px] text-slate-400 font-medium leading-tight mt-0.5">{isRTL ? 'نحن هنا لمساعدتك' : "We're here to help"}</p>
               </div>
             </Link>
           </div>

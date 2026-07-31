@@ -5,6 +5,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { Upload, FileText, CheckCircle, Clock, XCircle, CreditCard, Plus, User, Phone, ArrowLeft, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { MembershipFeeModal } from '../components/MembershipFeeModal';
 
 type TabType = 'requests' | 'payments' | 'memberships';
 
@@ -18,6 +19,7 @@ export const UserRequestsPage = () => {
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   
   const [showForm, setShowForm] = useState(false);
+  const [showMembershipModal, setShowMembershipModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const submitLock = useRef(false);
@@ -108,11 +110,6 @@ export const UserRequestsPage = () => {
         const { error } = await supabase.from('user_payments').insert({ ...base, method_id: methodId });
         if (error) throw error;
         toast.success(isRTL ? 'تم إرسال الدفعة بنجاح' : 'Payment submitted');
-      } else if (activeTab === 'memberships') {
-        if (!amount) { toast.error(isRTL ? 'المبلغ مطلوب' : 'Amount required'); submitLock.current = false; setIsLoading(false); return; }
-        const { error } = await supabase.from('user_memberships').insert({ user_id: user.id, amount: parseFloat(amount), notes, receipt_url });
-        if (error) throw error;
-        toast.success(isRTL ? 'تم إرسال طلب الانتساب' : 'Membership request submitted');
       }
 
       resetForm();
@@ -143,8 +140,10 @@ export const UserRequestsPage = () => {
   ];
 
   return (
-    <div className="container-custom py-8" dir={isRTL ? 'rtl' : 'ltr'}>
-      <h1 className="section-title mb-6">{isRTL ? 'حسابي' : 'My Account'}</h1>
+    <div className="container-custom pt-24 pb-24" dir={isRTL ? 'rtl' : 'ltr'}>
+      <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-6">
+        {isRTL ? 'طلباتي ومدفوعاتي' : 'My Requests & Payments'}
+      </h1>
 
       {/* User Info Banner */}
       {userProfile && (
@@ -181,7 +180,10 @@ export const UserRequestsPage = () => {
               <h2 className="text-xl font-bold text-slate-800 dark:text-white">
                 {tabs.find(t => t.id === activeTab)?.label}
               </h2>
-              <button onClick={() => setShowForm(true)} className="btn-primary flex items-center gap-2">
+              <button
+                onClick={() => activeTab === 'memberships' ? setShowMembershipModal(true) : setShowForm(true)}
+                className="btn-primary flex items-center gap-2"
+              >
                 <Plus className="w-5 h-5" />
                 {isRTL ? 'إضافة جديد' : 'Add New'}
               </button>
@@ -250,9 +252,7 @@ export const UserRequestsPage = () => {
                 {isRTL ? <ArrowRight className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5" />}
               </button>
               <h2 className="text-2xl font-bold text-slate-800 dark:text-white">
-                {activeTab === 'requests' ? (isRTL ? 'طلب جديد' : 'New Request') :
-                 activeTab === 'payments' ? (isRTL ? 'دفعة جديدة' : 'New Payment') :
-                 (isRTL ? 'رسم انتساب جديد' : 'New Membership Fee')}
+                {activeTab === 'requests' ? (isRTL ? 'طلب جديد' : 'New Request') : (isRTL ? 'دفعة جديدة' : 'New Payment')}
               </h2>
             </div>
 
@@ -279,14 +279,12 @@ export const UserRequestsPage = () => {
               </div>
             )}
 
-            {(activeTab !== 'requests' || true) && (
-              <div className="mb-4">
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                  {isRTL ? 'المبلغ' : 'Amount'} {activeTab === 'requests' && <span className="text-slate-400 text-xs">({isRTL ? 'اختياري' : 'Optional'})</span>}
-                </label>
-                <input type="number" min="0" step="0.01" required={activeTab !== 'requests'} value={amount} onChange={e => setAmount(e.target.value)} className="input-field" placeholder="0.00" />
-              </div>
-            )}
+            <div className="mb-4">
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                {isRTL ? 'المبلغ' : 'Amount'} {activeTab === 'requests' && <span className="text-slate-400 text-xs">({isRTL ? 'اختياري' : 'Optional'})</span>}
+              </label>
+              <input type="number" min="0" step="0.01" required={activeTab !== 'requests'} value={amount} onChange={e => setAmount(e.target.value)} className="input-field" placeholder="0.00" />
+            </div>
 
             <div className="mb-4">
               <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{isRTL ? 'ملاحظات' : 'Notes'}</label>
@@ -328,6 +326,13 @@ export const UserRequestsPage = () => {
           </motion.form>
         )}
       </AnimatePresence>
+
+      {showMembershipModal && (
+        <MembershipFeeModal
+          onClose={() => setShowMembershipModal(false)}
+          onSubmitted={fetchAll}
+        />
+      )}
     </div>
   );
 };

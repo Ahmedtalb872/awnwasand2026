@@ -242,7 +242,7 @@ export const AuthPage = () => {
     <div className="min-h-screen flex items-center justify-center p-4 lg:p-8 bg-[#f8fafc] dark:bg-[#0f172a] relative overflow-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Premium Animated Background Elements */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 blur-[120px] pointer-events-none animate-pulse-slow" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-gradient-to-tl from-teal-500/20 to-emerald-500/20 blur-[120px] pointer-events-none animate-pulse-slow" style={{ animationDelay: '2s' }} />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-gradient-to-tl from-secondary/30 to-secondary-dark/20 blur-[120px] pointer-events-none animate-pulse-slow" style={{ animationDelay: '2s' }} />
 
       <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -296,8 +296,8 @@ export const AuthPage = () => {
                   transition={{ delay: item.delay }}
                   className="flex items-center gap-3"
                 >
-                  <div className="w-6 h-6 rounded-full bg-emerald-400/20 flex items-center justify-center">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  <div className="w-6 h-6 rounded-full bg-secondary/20 flex items-center justify-center">
+                    <ShieldCheck className="w-4 h-4 text-secondary" />
                   </div>
                   <span className="font-medium text-indigo-50">{item.label}</span>
                 </motion.div>
@@ -420,10 +420,10 @@ export const AuthPage = () => {
 
                   <button 
                     onClick={() => setStep('signup_mahaja')}
-                    className="w-full py-5 px-6 bg-gradient-to-r from-teal-50 to-emerald-50 dark:from-teal-900/20 dark:to-emerald-900/20 hover:from-teal-100 hover:to-emerald-100 dark:hover:from-teal-900/40 dark:hover:to-emerald-900/40 border-2 border-teal-200 dark:border-teal-800 rounded-2xl flex items-center justify-between group transition-all"
+                    className="w-full py-5 px-6 bg-gradient-to-r from-secondary/10 to-secondary/5 dark:from-secondary/10 dark:to-secondary/5 hover:from-secondary/20 hover:to-secondary/10 border-2 border-secondary/30 dark:border-secondary/20 rounded-2xl flex items-center justify-between group transition-all"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-teal-100 dark:bg-teal-900/50 rounded-full flex items-center justify-center text-teal-600 dark:text-teal-400">
+                      <div className="w-12 h-12 bg-secondary/20 dark:bg-secondary/20 rounded-full flex items-center justify-center text-secondary-dark dark:text-secondary">
                         <BookOpen className="w-6 h-6" />
                       </div>
                       <div className="text-start">
@@ -431,7 +431,7 @@ export const AuthPage = () => {
                         <p className="text-sm text-slate-500">{isRTL ? 'منصة الدورات والكتب' : 'Courses & Books Platform'}</p>
                       </div>
                     </div>
-                    <ChevronLeft className="w-5 h-5 text-slate-400 group-hover:text-teal-600 transition-colors" />
+                    <ChevronLeft className="w-5 h-5 text-slate-400 group-hover:text-secondary-dark transition-colors" />
                   </button>
 
                   <button type="button" onClick={() => setStep('login')} className="mt-4 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-medium">
