@@ -79,28 +79,49 @@ Deno.serve(async (req: Request) => {
 
     const uniquePhones = [...new Set(phones.map((p: string) => String(p).trim()).filter(Boolean))];
     const endpoint = `https://chinguisoft.com/api/sms/campaign/${CAMPAIGN_KEY}`;
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+    const sendOne = async (phone: string): Promise<string> => {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Campaign-token': CAMPAIGN_TOKEN,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phone, lang, url }),
+      });
+      if (res.status === 429) {
+        // Rate-limited — wait a bit and retry once before giving up.
+        await sleep(2000);
+        const retryRes = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Campaign-token': CAMPAIGN_TOKEN,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ phone, lang, url }),
+        });
+        if (!retryRes.ok) {
+          const text = await retryRes.text().catch(() => '');
+          throw new Error(`HTTP ${retryRes.status}${text ? `: ${text.slice(0, 200)}` : ''}`);
+        }
+        return phone;
+      }
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        throw new Error(`HTTP ${res.status}${text ? `: ${text.slice(0, 200)}` : ''}`);
+      }
+      return phone;
+    };
+
+    // Small batches with a pause between them — sending too many
+    // requests to Chinguisoft at once triggers their rate limit (429).
     const results: SmsResult[] = [];
-    const BATCH = 10;
+    const BATCH = 3;
+    const BATCH_DELAY_MS = 700;
     for (let i = 0; i < uniquePhones.length; i += BATCH) {
       const batch = uniquePhones.slice(i, i + BATCH);
-      const batchResults = await Promise.allSettled(
-        batch.map(async (phone) => {
-          const res = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-              'Campaign-token': CAMPAIGN_TOKEN,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ phone, lang, url }),
-          });
-          if (!res.ok) {
-            const text = await res.text().catch(() => '');
-            throw new Error(`HTTP ${res.status}${text ? `: ${text.slice(0, 200)}` : ''}`);
-          }
-          return phone;
-        })
-      );
+      const batchResults = await Promise.allSettled(batch.map(sendOne));
 
       batchResults.forEach((r, idx) => {
         const phone = batch[idx];
@@ -111,6 +132,10 @@ Deno.serve(async (req: Request) => {
           results.push({ phone, status: 'failed', error: err });
         }
       });
+
+      if (i + BATCH < uniquePhones.length) {
+        await sleep(BATCH_DELAY_MS);
+      }
     }
 
     // Log every attempt for admin visibility (this costs real balance).
