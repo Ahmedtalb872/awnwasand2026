@@ -4,10 +4,10 @@
 
 @layer base {
   :root {
-    --primary: 13 148 136; /* teal-600 */
-    --primary-light: 45 212 191; /* teal-400 */
-    --secondary: 234 179 8; /* yellow-500 */
-    --accent: 244 63 94; /* rose-500 */
+    --primary: 40 36 73; /* logo navy */
+    --primary-light: 115 112 136; /* logo navy, lightened */
+    --secondary: 241 174 166; /* logo peach */
+    --accent: 241 174 166; /* logo peach */
     --background: 248 250 252; /* slate-50 */
     --surface: 255 255 255; /* white */
     --text-main: 15 23 42; /* slate-900 */
@@ -15,10 +15,10 @@
   }
 
   .dark {
-    --primary: 20 184 166; /* teal-500 */
-    --primary-light: 94 234 212; /* teal-300 */
-    --secondary: 250 204 21; /* yellow-400 */
-    --accent: 251 113 133; /* rose-400 */
+    --primary: 115 112 136; /* logo navy, lightened for dark mode */
+    --primary-light: 244 194 188; /* logo peach, lightened */
+    --secondary: 241 174 166; /* logo peach */
+    --accent: 241 174 166; /* logo peach */
     --background: 15 23 42; /* slate-900 */
     --surface: 30 41 59; /* slate-800 */
     --text-main: 241 245 249; /* slate-100 */
@@ -53,7 +53,7 @@
   }
 
   .mobile-nav-link {
-    @apply flex items-center gap-3 text-slate-700 dark:text-slate-200 hover:text-teal-600 dark:hover:text-teal-400 font-medium py-3 px-4 rounded-xl hover:bg-teal-50 dark:hover:bg-slate-800 transition-all duration-300;
+    @apply flex items-center gap-3 text-slate-700 dark:text-slate-200 hover:text-primary dark:hover:text-secondary font-medium py-3 px-4 rounded-xl hover:bg-secondary/10 dark:hover:bg-slate-800 transition-all duration-300;
   }
 
   .btn {
@@ -77,11 +77,11 @@
   }
 
   .card {
-    @apply bg-white dark:bg-slate-800 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-teal-500/10 hover:border-teal-500/30 dark:hover:border-teal-500/30;
+    @apply bg-white dark:bg-slate-800 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-secondary/20 hover:border-secondary/40 dark:hover:border-secondary/40;
   }
 
   .section-title {
-    @apply text-3xl md:text-5xl font-bold text-center mb-4 bg-gradient-to-r from-teal-600 to-cyan-600 dark:from-teal-400 dark:to-cyan-400 bg-clip-text text-transparent;
+    @apply text-3xl md:text-5xl font-bold text-center mb-4 bg-gradient-to-r from-primary to-secondary-dark dark:from-primary-light dark:to-secondary bg-clip-text text-transparent;
   }
 
   .section-subtitle {
@@ -89,7 +89,7 @@
   }
 
   .input-field {
-    @apply w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-400 focus:ring-2 focus:ring-teal-500/20 outline-none transition-all duration-300;
+    @apply w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-secondary-dark dark:focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-all duration-300;
   }
 }
 
