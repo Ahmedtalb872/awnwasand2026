@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Users, Bell, Vote, Upload, LogOut, ShieldAlert, LayoutDashboard, ShieldCheck, DollarSign, HeartPulse, BookOpen, UserCog, FileText, CreditCard, Heart, MessageSquare } from 'lucide-react';
+import { Users, Bell, Vote, Upload, LogOut, ShieldAlert, LayoutDashboard, ShieldCheck, DollarSign, HeartPulse, BookOpen, UserCog, FileText, CreditCard, Heart, MessageSquare, Contact2 } from 'lucide-react';
 
 import { UsersTab } from '../components/admin/UsersTab';
 import { NotificationsTab } from '../components/admin/NotificationsTab';
@@ -19,6 +19,7 @@ import { CompetitionsManagementTab } from '../components/admin/CompetitionsManag
 import { MembershipsTab } from '../components/admin/MembershipsTab';
 import { UserDonationsTab } from '../components/admin/UserDonationsTab';
 import { SmsTab } from '../components/admin/SmsTab';
+import { MembershipRosterTab } from '../components/admin/MembershipRosterTab';
 import { useAuth } from '../contexts/AuthContext';
 
 export const AdminPage = () => {
@@ -31,7 +32,7 @@ export const AdminPage = () => {
   const [password, setPassword] = useState('');
   const [adminRole, setAdminRole] = useState<string>('Super Admin');
   
-  const [activeTab, setActiveTab] = useState<'users' | 'approvals' | 'notifications' | 'voting' | 'media' | 'finance' | 'patients' | 'mahaja' | 'admins' | 'requests' | 'competitions' | 'memberships' | 'user_donations' | 'sms'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'approvals' | 'notifications' | 'voting' | 'media' | 'finance' | 'patients' | 'mahaja' | 'admins' | 'requests' | 'competitions' | 'memberships' | 'user_donations' | 'sms' | 'membership_roster'>('users');
   
   // Dashboard state
   const [usersCount, setUsersCount] = useState(0);
@@ -269,6 +270,7 @@ export const AdminPage = () => {
     { id: 'memberships',   icon: CreditCard,  label: isRTL ? 'رسوم الانتساب' : 'Memberships',   color: 'text-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-900/20' },
     { id: 'user_donations',icon: Heart,       label: isRTL ? 'التبرعات الواردة' : 'User Donations', color: 'text-rose-500', bg: 'bg-rose-50 dark:bg-rose-900/20' },
     { id: 'sms',            icon: MessageSquare, label: isRTL ? 'رسائل SMS' : 'SMS',            color: 'text-amber-500',  bg: 'bg-amber-50 dark:bg-amber-900/20' },
+    { id: 'membership_roster', icon: Contact2,    label: isRTL ? 'انتساب أعضاء الجمعية' : 'Membership Roster', color: 'text-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-900/20' },
   ];
 
   if (adminRole === 'Super Admin') {
@@ -361,6 +363,7 @@ export const AdminPage = () => {
               {activeTab === 'memberships'   && <MembershipsTab users={users} />}
               {activeTab === 'user_donations'&& <UserDonationsTab users={users} />}
               {activeTab === 'sms'           && <SmsTab users={users} />}
+              {activeTab === 'membership_roster' && <MembershipRosterTab />}
             </AnimatePresence>
           </div>
         </div>
