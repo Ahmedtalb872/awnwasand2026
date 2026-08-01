@@ -175,6 +175,21 @@ export const SmsTab = ({ users = [] }: { users?: any[] }) => {
     }
   };
 
+  const handleToggleContactSent = async (id: string, currentSent: boolean) => {
+    if (!adminId) return;
+    const nextSent = !currentSent;
+    setContacts(prev => prev.map(c => c.id === id ? { ...c, sent: nextSent } : c));
+    if (nextSent) setSelectedContactIds(prev => { const next = new Set(prev); next.delete(id); return next; });
+    try {
+      const { data, error } = await supabase.rpc('admin_set_sms_contact_sent', { p_admin_id: adminId, p_id: id, p_sent: nextSent });
+      if (error) throw error;
+      if (data?.success === false) throw new Error(data.message);
+    } catch (err: any) {
+      setContacts(prev => prev.map(c => c.id === id ? { ...c, sent: currentSent } : c));
+      toast.error(err.message || (isRTL ? 'فشل تحديث حالة الإرسال' : 'Failed to update sent status'));
+    }
+  };
+
   const toggleContact = (id: string) => {
     setSelectedContactIds(prev => {
       const next = new Set(prev);
@@ -191,10 +206,10 @@ export const SmsTab = ({ users = [] }: { users?: any[] }) => {
     );
   }, [contacts, contactSearch]);
 
-  const selectAllUnpaidContacts = () => {
+  const selectAllEligibleContacts = () => {
     setSelectedContactIds(prev => {
       const next = new Set(prev);
-      filteredContacts.forEach(c => { if (!c.paid) next.add(c.id); });
+      filteredContacts.forEach(c => { if (!c.paid && !c.sent) next.add(c.id); });
       return next;
     });
   };
@@ -250,6 +265,18 @@ export const SmsTab = ({ users = [] }: { users?: any[] }) => {
       toast.success(isRTL
         ? `تم الإرسال: ${data.sent} نجح، ${data.failed} فشل من أصل ${data.total}`
         : `Sent: ${data.sent} succeeded, ${data.failed} failed out of ${data.total}`);
+
+      // Mark saved contacts whose number actually succeeded as "sent",
+      // so they're excluded from being selected for a future send.
+      const succeededPhones: string[] = (data.results || [])
+        .filter((r: any) => r.status === 'sent')
+        .map((r: any) => r.phone);
+      if (succeededPhones.length > 0) {
+        setContacts(prev => prev.map(c => succeededPhones.includes(c.phone) ? { ...c, sent: true } : c));
+        supabase.rpc('admin_mark_sms_contacts_sent', { p_admin_id: adminId, p_phones: succeededPhones })
+          .then(({ error: markError }) => { if (markError) console.error('Failed to mark contacts sent:', markError); });
+      }
+
       clearSelection();
       clearContactSelection();
       setExtraPhonesRaw('');
@@ -372,8 +399,8 @@ export const SmsTab = ({ users = [] }: { users?: any[] }) => {
               {isRTL ? 'قائمة أرقام محفوظة' : 'Saved contacts list'}
             </label>
             <div className="flex items-center gap-2">
-              <button onClick={selectAllUnpaidContacts} className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
-                {isRTL ? 'تحديد كل من لم يدفع' : 'Select all unpaid'}
+              <button onClick={selectAllEligibleContacts} className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+                {isRTL ? 'تحديد كل من لم يدفع ولم تُرسل له' : 'Select all eligible'}
               </button>
               <button onClick={clearContactSelection} className="text-xs font-bold text-slate-500 hover:underline">
                 {isRTL ? 'إلغاء التحديد' : 'Clear'}
@@ -396,12 +423,14 @@ export const SmsTab = ({ users = [] }: { users?: any[] }) => {
             <div className="max-h-72 overflow-y-auto border border-slate-200 dark:border-slate-700 rounded-xl divide-y divide-slate-100 dark:divide-slate-800 mb-3">
               {filteredContacts.length === 0 ? (
                 <div className="text-center py-6 text-slate-400 text-sm">{isRTL ? 'لا توجد أرقام محفوظة بعد' : 'No saved contacts yet'}</div>
-              ) : filteredContacts.map(c => (
-                <div key={c.id} className={`flex items-center gap-3 p-3 ${c.paid ? 'opacity-60' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
+              ) : filteredContacts.map(c => {
+                const locked = c.paid || c.sent;
+                return (
+                <div key={c.id} className={`flex items-center gap-3 p-3 flex-wrap ${locked ? 'opacity-60' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
                   <input
                     type="checkbox"
                     checked={selectedContactIds.has(c.id)}
-                    disabled={c.paid}
+                    disabled={locked}
                     onChange={() => toggleContact(c.id)}
                     className="w-4 h-4"
                   />
@@ -409,6 +438,18 @@ export const SmsTab = ({ users = [] }: { users?: any[] }) => {
                     {c.name || (isRTL ? 'بدون اسم' : 'No name')}
                   </span>
                   <span className="font-mono text-xs text-slate-400">{c.phone}</span>
+                  <button
+                    onClick={() => handleToggleContactSent(c.id, c.sent)}
+                    className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full shrink-0 transition-colors ${
+                      c.sent
+                        ? 'text-indigo-700 bg-indigo-100 hover:bg-indigo-200'
+                        : 'text-slate-500 bg-slate-100 hover:bg-slate-200'
+                    }`}
+                    title={isRTL ? 'اضغط لتغيير حالة الإرسال' : 'Click to toggle sent status'}
+                  >
+                    {c.sent && <CheckCircle className="w-3 h-3" />}
+                    {c.sent ? (isRTL ? 'تم الإرسال له' : 'Sent') : (isRTL ? 'لم تُرسل له' : 'Not sent')}
+                  </button>
                   <button
                     onClick={() => handleToggleContactPaid(c.id, c.paid)}
                     className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full shrink-0 transition-colors ${
@@ -429,7 +470,8 @@ export const SmsTab = ({ users = [] }: { users?: any[] }) => {
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
@@ -453,8 +495,8 @@ export const SmsTab = ({ users = [] }: { users?: any[] }) => {
           </div>
           <p className="text-xs text-slate-400 mt-2">
             {isRTL
-              ? `${selectedContactIds.size} رقم محدد من القائمة المحفوظة · اضغط على "لم يدفع" بجانب أي رقم لتعليمه كـ"تم الدفع" فلا يعود يُمكن تحديده لإرسال آخر.`
-              : `${selectedContactIds.size} selected from the saved list · click "Unpaid" next to a number to mark it "Paid", after which it can no longer be selected for another send.`}
+              ? `${selectedContactIds.size} رقم محدد من القائمة المحفوظة · بعد كل إرسال ناجح، يُعلَّم الرقم تلقائياً "تم الإرسال له" فلا تُرسل له الرسالة مرة أخرى. يمكنك أيضاً تعليم أي رقم يدوياً بالضغط على شارتي "الدفع" أو "الإرسال".`
+              : `${selectedContactIds.size} selected from the saved list · after a successful send, a number is automatically marked "Sent" so the message isn't sent to it again. You can also toggle either badge manually.`}
           </p>
         </div>
 

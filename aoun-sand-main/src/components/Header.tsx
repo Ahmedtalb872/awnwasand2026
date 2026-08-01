@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Sun, Moon, Globe, Bell, X } from 'lucide-react';
+import { Sun, Moon, Globe, Bell, X, Menu } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -12,6 +12,7 @@ import { CreditCard } from 'lucide-react';
 export const Header = () => {
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen]       = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled]             = useState(false);
   const [hasUnread, setHasUnread]           = useState(false);
   const [notifications, setNotifications]   = useState<any[]>([]);
@@ -24,6 +25,18 @@ export const Header = () => {
   const location = useLocation();
   const isRTL = language === 'ar';
   const isHomePage = location.pathname === '/';
+
+  const navLinks = [
+    { path: '/',         label: isRTL ? 'الرئيسية' : (language === 'fr' ? 'Accueil' : 'Home') },
+    { path: '/about',    label: isRTL ? 'من نحن'   : (language === 'fr' ? 'À propos' : 'About') },
+    { path: '/projects', label: isRTL ? 'المشاريع' : (language === 'fr' ? 'Projets' : 'Projects') },
+    { path: '/donate',   label: isRTL ? 'التبرع'   : (language === 'fr' ? 'Don' : 'Donate') },
+    { path: '/contact',  label: isRTL ? 'اتصل بنا' : (language === 'fr' ? 'Contact' : 'Contact') },
+  ];
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
 
   /* ── Scroll shadow ── */
   useEffect(() => {
@@ -95,7 +108,7 @@ export const Header = () => {
       }`}
     >
       <nav
-        className="px-4 sm:px-6 py-3 max-w-5xl mx-auto flex items-center justify-between"
+        className="px-4 sm:px-6 py-3 max-w-5xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-2"
         dir={isRTL ? 'rtl' : 'ltr'}
       >
         {/* ── Group 1: Logo/Avatar (RTL Start, LTR Left) ── */}
@@ -147,8 +160,43 @@ export const Header = () => {
           )}
         </div>
 
+        {/* ── Center: Desktop nav links ── */}
+        <nav className="hidden md:flex items-center justify-center gap-1">
+          {navLinks.map(item => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`px-3 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-colors ${
+                  isActive
+                    ? isHomePage ? 'text-white bg-white/15' : 'text-primary dark:text-secondary bg-secondary/10'
+                    : isHomePage
+                      ? 'text-white/80 hover:text-white hover:bg-white/10'
+                      : 'text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-secondary hover:bg-slate-100 dark:hover:bg-slate-800'
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
         {/* ── Group 2: Actions (RTL End, LTR Right) ── */}
         <div className="flex items-center gap-1 sm:gap-2">
+
+          {/* Mobile menu toggle */}
+          <button
+            onClick={() => setIsMobileMenuOpen(v => !v)}
+            className={`md:hidden p-2.5 rounded-full transition-colors ${
+              isHomePage
+                ? 'hover:bg-white/10 text-white'
+                : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300'
+            }`}
+            aria-label="Menu"
+          >
+            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
 
           {/* My Card Button (Mobile Only for non-homepage) */}
           {!isHomePage && userProfile && (
@@ -320,7 +368,39 @@ export const Header = () => {
 
         </div>
       </nav>
-      
+
+      {/* ── Mobile nav dropdown ── */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.nav
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden overflow-hidden bg-white dark:bg-slate-900 border-b border-slate-200/50 dark:border-slate-800/50 shadow-lg"
+            dir={isRTL ? 'rtl' : 'ltr'}
+          >
+            <div className="px-4 py-3 flex flex-col gap-1 max-w-5xl mx-auto">
+              {navLinks.map(item => {
+                const isActive = location.pathname === item.path;
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={`px-4 py-3 rounded-xl text-sm font-bold transition-colors ${
+                      isActive
+                        ? 'text-primary dark:text-secondary bg-secondary/10'
+                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </motion.nav>
+        )}
+      </AnimatePresence>
+
       {userProfile && (
         <MembershipCardModal 
           isOpen={isCardModalOpen} 
