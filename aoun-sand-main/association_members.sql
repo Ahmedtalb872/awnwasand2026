@@ -36,10 +36,11 @@ BEGIN
 
     FOR v_member IN SELECT * FROM json_array_elements(p_members)
     LOOP
-        INSERT INTO public.association_members (phone, name, added_by)
-        VALUES (v_member->>'phone', v_member->>'name', p_admin_id)
+        INSERT INTO public.association_members (phone, name, paid, added_by)
+        VALUES (v_member->>'phone', v_member->>'name', COALESCE((v_member->>'paid')::boolean, false), p_admin_id)
         ON CONFLICT (phone) DO UPDATE
-            SET name = COALESCE(EXCLUDED.name, public.association_members.name);
+            SET name = COALESCE(EXCLUDED.name, public.association_members.name),
+                paid = public.association_members.paid OR EXCLUDED.paid;
         v_count := v_count + 1;
     END LOOP;
 

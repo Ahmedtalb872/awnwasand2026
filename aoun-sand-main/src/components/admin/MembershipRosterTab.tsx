@@ -7,20 +7,23 @@ import { Contact2, UserPlus, Trash2, Search, CheckCircle, Image, FileDown } from
 import { generateFinancialPDF } from '../../utils/pdfGenerator';
 
 // Parses lines like "احمد, 44800028" or "44800028" or "فاطمة - 46xxxxxx"
-// into { name, phone } pairs, same convention as the SMS saved-contacts list.
-const parseMemberLines = (raw: string): { name: string | null; phone: string }[] => {
+// into { name, phone, paid } triples, same convention as the SMS saved-contacts list.
+// A trailing ✅ marks the member as already paid (e.g. from a WhatsApp roster export).
+const parseMemberLines = (raw: string): { name: string | null; phone: string; paid: boolean }[] => {
   return raw
     .split(/\n+/)
     .map(line => {
       const trimmed = line.trim();
       if (!trimmed) return null;
-      const phoneMatch = trimmed.match(/(\+?\d[\d\s-]{5,}\d)/);
+      const paid = /✅️?/.test(trimmed);
+      const withoutCheck = trimmed.replace(/✅️?/g, '').trim();
+      const phoneMatch = withoutCheck.match(/(\+?\d[\d\s-]{5,}\d)/);
       if (!phoneMatch) return null;
       const phone = phoneMatch[0].replace(/[\s-]/g, '');
-      const name = trimmed.replace(phoneMatch[0], '').replace(/^[,\-–\s]+|[,\-–\s]+$/g, '').trim() || null;
-      return { name, phone };
+      const name = withoutCheck.replace(phoneMatch[0], '').replace(/^[,\-–\s]+|[,\-–\s]+$/g, '').trim() || null;
+      return { name, phone, paid };
     })
-    .filter((c): c is { name: string | null; phone: string } => c !== null);
+    .filter((c): c is { name: string | null; phone: string; paid: boolean } => c !== null);
 };
 
 export const MembershipRosterTab = () => {
@@ -266,7 +269,7 @@ export const MembershipRosterTab = () => {
             value={newMembersRaw}
             onChange={e => setNewMembersRaw(e.target.value)}
             className="input-field font-mono text-sm flex-1"
-            placeholder={isRTL ? 'الاسم, الرقم (اختياري الاسم) — سطر لكل عضو\nمثال:\nأحمد, 44800028\n46xxxxxx' : 'Name, number (name optional) — one per line\ne.g.\nAhmed, 44800028\n46xxxxxx'}
+            placeholder={isRTL ? 'الاسم, الرقم ✅ (اختياري الاسم، و✅ تعني تم الدفع) — سطر لكل عضو\nمثال:\nأحمد, 44800028 ✅\n46xxxxxx' : 'Name, number ✅ (name optional, ✅ marks paid) — one per line\ne.g.\nAhmed, 44800028 ✅\n46xxxxxx'}
           />
           <button
             onClick={handleAddMembers}
@@ -279,8 +282,8 @@ export const MembershipRosterTab = () => {
         </div>
         <p className="text-xs text-slate-400 mt-2">
           {isRTL
-            ? 'الصق الأسماء والأرقام هنا (سطر لكل عضو)، ثم بدّل حالة "الدفع" و"استلام صورة الدفع" لكل عضو حسب المتابعة.'
-            : 'Paste names and numbers here (one per line), then toggle each member\'s "Paid" and "Receipt received" status as you follow up.'}
+            ? 'الصق الأسماء والأرقام هنا (سطر لكل عضو). إضافة ✅ في نهاية السطر تُدرج العضو كـ"تم الدفع" مباشرة. بعد ذلك بدّل حالة "الدفع" و"استلام صورة الدفع" لكل عضو حسب المتابعة.'
+            : 'Paste names and numbers here (one per line). A trailing ✅ marks that member as already paid on import. Afterward, toggle each member\'s "Paid" and "Receipt received" status as you follow up.'}
         </p>
       </div>
     </motion.div>
