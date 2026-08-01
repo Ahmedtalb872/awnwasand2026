@@ -114,6 +114,23 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+CREATE OR REPLACE FUNCTION admin_update_association_member(p_admin_id UUID, p_id UUID, p_name TEXT, p_phone TEXT)
+RETURNS JSON AS $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM public.system_admins WHERE id = p_admin_id AND is_active = true) THEN
+        RETURN json_build_object('success', false, 'message', 'Unauthorized');
+    END IF;
+    IF p_phone IS NULL OR btrim(p_phone) = '' THEN
+        RETURN json_build_object('success', false, 'message', 'Phone is required');
+    END IF;
+    IF EXISTS (SELECT 1 FROM public.association_members WHERE phone = p_phone AND id <> p_id) THEN
+        RETURN json_build_object('success', false, 'message', 'Phone already used by another member');
+    END IF;
+    UPDATE public.association_members SET name = NULLIF(btrim(p_name), ''), phone = p_phone WHERE id = p_id;
+    RETURN json_build_object('success', true);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 CREATE OR REPLACE FUNCTION admin_set_association_member_receipt(p_admin_id UUID, p_id UUID, p_received BOOLEAN)
 RETURNS JSON AS $$
 BEGIN

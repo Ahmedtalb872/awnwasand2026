@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { Contact2, UserPlus, Trash2, Search, CheckCircle, Image, FileDown, CalendarClock, RotateCcw } from 'lucide-react';
+import { Contact2, UserPlus, Trash2, Search, CheckCircle, Image, FileDown, CalendarClock, RotateCcw, Pencil, Check, X } from 'lucide-react';
 import { generateFinancialPDF } from '../../utils/pdfGenerator';
 
 // Parses lines like "احمد, 44800028" or "44800028" or "فاطمة - 46xxxxxx"
@@ -42,6 +42,10 @@ export const MembershipRosterTab = () => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [feeMonth, setFeeMonth] = useState(() => localStorage.getItem('association_members_fee_month') || currentMonthValue());
   const [isResetting, setIsResetting] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   useEffect(() => {
     fetchMembers();
@@ -101,6 +105,37 @@ export const MembershipRosterTab = () => {
       setSelectedIds(prev => { const next = new Set(prev); next.delete(id); return next; });
     } catch (err: any) {
       toast.error(err.message || (isRTL ? 'فشل الحذف' : 'Failed to delete'));
+    }
+  };
+
+  const startEditing = (m: any) => {
+    setEditingId(m.id);
+    setEditName(m.name || '');
+    setEditPhone(m.phone || '');
+  };
+  const cancelEditing = () => setEditingId(null);
+
+  const handleSaveEdit = async (id: string) => {
+    if (!adminId) return;
+    const phone = editPhone.trim();
+    if (!phone) {
+      toast.error(isRTL ? 'رقم الهاتف مطلوب' : 'Phone number is required');
+      return;
+    }
+    setIsSavingEdit(true);
+    try {
+      const { data, error } = await supabase.rpc('admin_update_association_member', {
+        p_admin_id: adminId, p_id: id, p_name: editName.trim() || null, p_phone: phone,
+      });
+      if (error) throw error;
+      if (data?.success === false) throw new Error(data.message);
+      setMembers(prev => prev.map(m => m.id === id ? { ...m, name: editName.trim() || null, phone } : m));
+      setEditingId(null);
+      toast.success(isRTL ? 'تم الحفظ' : 'Saved');
+    } catch (err: any) {
+      toast.error(err.message || (isRTL ? 'فشل الحفظ' : 'Failed to save'));
+    } finally {
+      setIsSavingEdit(false);
     }
   };
 
@@ -337,52 +372,101 @@ export const MembershipRosterTab = () => {
           <div className="max-h-[28rem] overflow-y-auto border border-slate-200 dark:border-slate-700 rounded-xl divide-y divide-slate-100 dark:divide-slate-800 mb-4">
             {filteredMembers.length === 0 ? (
               <div className="text-center py-8 text-slate-400 text-sm">{isRTL ? 'لا يوجد أعضاء بعد' : 'No members yet'}</div>
-            ) : filteredMembers.map(m => (
+            ) : filteredMembers.map(m => {
+              const isEditing = editingId === m.id;
+              return (
               <div key={m.id} className="flex items-center gap-3 p-3 flex-wrap hover:bg-slate-50 dark:hover:bg-slate-800">
                 <input
                   type="checkbox"
                   checked={selectedIds.has(m.id)}
                   onChange={() => toggleSelect(m.id)}
+                  disabled={isEditing}
                   className="w-4 h-4"
                 />
-                <span className="flex-1 min-w-0 font-bold text-sm text-slate-700 dark:text-slate-200 truncate">
-                  {m.name || (isRTL ? 'بدون اسم' : 'No name')}
-                </span>
-                <span className="font-mono text-xs text-slate-400">{m.phone}</span>
-                <button
-                  onClick={() => handleTogglePaid(m.id, m.paid)}
-                  className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full shrink-0 transition-colors ${
-                    m.paid
-                      ? 'text-emerald-700 bg-emerald-100 hover:bg-emerald-200'
-                      : 'text-amber-700 bg-amber-100 hover:bg-amber-200'
-                  }`}
-                  title={isRTL ? 'اضغط لتغيير حالة الدفع' : 'Click to toggle paid status'}
-                >
-                  {m.paid && <CheckCircle className="w-3 h-3" />}
-                  {m.paid ? (isRTL ? 'تم الدفع' : 'Paid') : (isRTL ? 'لم يدفع' : 'Unpaid')}
-                  {m.paid && m.fee_month && <span className="opacity-70">({m.fee_month})</span>}
-                </button>
-                <button
-                  onClick={() => handleToggleReceipt(m.id, m.receipt_received)}
-                  className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full shrink-0 transition-colors ${
-                    m.receipt_received
-                      ? 'text-indigo-700 bg-indigo-100 hover:bg-indigo-200'
-                      : 'text-slate-500 bg-slate-100 hover:bg-slate-200'
-                  }`}
-                  title={isRTL ? 'اضغط لتغيير حالة استلام صورة الدفع' : 'Click to toggle receipt-received status'}
-                >
-                  {m.receipt_received && <Image className="w-3 h-3" />}
-                  {m.receipt_received ? (isRTL ? 'استُلمت الصورة' : 'Receipt received') : (isRTL ? 'لم تُستلم الصورة' : 'No receipt')}
-                </button>
-                <button
-                  onClick={() => handleDelete(m.id)}
-                  className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg shrink-0"
-                  aria-label={isRTL ? 'حذف' : 'Delete'}
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+                {isEditing ? (
+                  <>
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={e => setEditName(e.target.value)}
+                      placeholder={isRTL ? 'الاسم' : 'Name'}
+                      className="input-field flex-1 min-w-[8rem] py-1.5 text-sm"
+                      autoFocus
+                    />
+                    <input
+                      type="text"
+                      value={editPhone}
+                      onChange={e => setEditPhone(e.target.value)}
+                      placeholder={isRTL ? 'الهاتف' : 'Phone'}
+                      className="input-field w-36 py-1.5 text-sm font-mono"
+                    />
+                    <button
+                      onClick={() => handleSaveEdit(m.id)}
+                      disabled={isSavingEdit}
+                      className="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg shrink-0 disabled:opacity-50"
+                      aria-label={isRTL ? 'حفظ' : 'Save'}
+                    >
+                      <Check className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={cancelEditing}
+                      disabled={isSavingEdit}
+                      className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg shrink-0 disabled:opacity-50"
+                      aria-label={isRTL ? 'إلغاء' : 'Cancel'}
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <span className="flex-1 min-w-0 font-bold text-sm text-slate-700 dark:text-slate-200 truncate">
+                      {m.name || (isRTL ? 'بدون اسم' : 'No name')}
+                    </span>
+                    <span className="font-mono text-xs text-slate-400">{m.phone}</span>
+                    <button
+                      onClick={() => handleTogglePaid(m.id, m.paid)}
+                      className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full shrink-0 transition-colors ${
+                        m.paid
+                          ? 'text-emerald-700 bg-emerald-100 hover:bg-emerald-200'
+                          : 'text-amber-700 bg-amber-100 hover:bg-amber-200'
+                      }`}
+                      title={isRTL ? 'اضغط لتغيير حالة الدفع' : 'Click to toggle paid status'}
+                    >
+                      {m.paid && <CheckCircle className="w-3 h-3" />}
+                      {m.paid ? (isRTL ? 'تم الدفع' : 'Paid') : (isRTL ? 'لم يدفع' : 'Unpaid')}
+                      {m.paid && m.fee_month && <span className="opacity-70">({m.fee_month})</span>}
+                    </button>
+                    <button
+                      onClick={() => handleToggleReceipt(m.id, m.receipt_received)}
+                      className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full shrink-0 transition-colors ${
+                        m.receipt_received
+                          ? 'text-indigo-700 bg-indigo-100 hover:bg-indigo-200'
+                          : 'text-slate-500 bg-slate-100 hover:bg-slate-200'
+                      }`}
+                      title={isRTL ? 'اضغط لتغيير حالة استلام صورة الدفع' : 'Click to toggle receipt-received status'}
+                    >
+                      {m.receipt_received && <Image className="w-3 h-3" />}
+                      {m.receipt_received ? (isRTL ? 'استُلمت الصورة' : 'Receipt received') : (isRTL ? 'لم تُستلم الصورة' : 'No receipt')}
+                    </button>
+                    <button
+                      onClick={() => startEditing(m)}
+                      className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg shrink-0"
+                      aria-label={isRTL ? 'تعديل' : 'Edit'}
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(m.id)}
+                      className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg shrink-0"
+                      aria-label={isRTL ? 'حذف' : 'Delete'}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </>
+                )}
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
