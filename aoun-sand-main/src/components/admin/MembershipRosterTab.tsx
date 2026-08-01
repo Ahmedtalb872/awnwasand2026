@@ -233,6 +233,10 @@ export const MembershipRosterTab = () => {
     receipts: members.filter(m => m.receipt_received).length,
   }), [members]);
 
+  const donutC = 2 * Math.PI * 46;
+  const paidPct = stats.total > 0 ? Math.round((stats.paid / stats.total) * 100) : 0;
+  const paidDash = stats.total > 0 ? (stats.paid / stats.total) * donutC : 0;
+
   const handleDownloadPDF = async () => {
     setDownloadingPDF(true);
     try {
@@ -315,18 +319,58 @@ export const MembershipRosterTab = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 text-center">
-            <p className="text-2xl font-black text-slate-800 dark:text-white">{stats.total}</p>
-            <p className="text-xs text-slate-500 mt-1">{isRTL ? 'إجمالي الأعضاء' : 'Total members'}</p>
+        <div className="flex flex-col lg:flex-row gap-3 mb-6">
+          <div className="grid grid-cols-3 gap-3 flex-1">
+            <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 text-center">
+              <p className="text-2xl font-black text-slate-800 dark:text-white">{stats.total}</p>
+              <p className="text-xs text-slate-500 mt-1">{isRTL ? 'إجمالي الأعضاء' : 'Total members'}</p>
+            </div>
+            <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl p-4 text-center">
+              <p className="text-2xl font-black text-emerald-700 dark:text-emerald-400">{stats.paid}</p>
+              <p className="text-xs text-slate-500 mt-1">{isRTL ? 'دفعوا الرسوم' : 'Paid'}</p>
+            </div>
+            <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl p-4 text-center">
+              <p className="text-2xl font-black text-indigo-700 dark:text-indigo-400">{stats.receipts}</p>
+              <p className="text-xs text-slate-500 mt-1">{isRTL ? 'استلمت صورة الدفع' : 'Receipt received'}</p>
+            </div>
           </div>
-          <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl p-4 text-center">
-            <p className="text-2xl font-black text-emerald-700 dark:text-emerald-400">{stats.paid}</p>
-            <p className="text-xs text-slate-500 mt-1">{isRTL ? 'دفعوا الرسوم' : 'Paid'}</p>
-          </div>
-          <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl p-4 text-center">
-            <p className="text-2xl font-black text-indigo-700 dark:text-indigo-400">{stats.receipts}</p>
-            <p className="text-xs text-slate-500 mt-1">{isRTL ? 'استلمت صورة الدفع' : 'Receipt received'}</p>
+
+          <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 shrink-0 lg:w-72">
+            {stats.total === 0 ? (
+              <p className="text-xs text-slate-400 w-full text-center py-4">{isRTL ? 'لا توجد بيانات بعد' : 'No data yet'}</p>
+            ) : (
+              <>
+                <svg viewBox="0 0 120 120" className="w-24 h-24 shrink-0" role="img" aria-label={isRTL ? `${paidPct}% دفعوا الرسوم` : `${paidPct}% paid`}>
+                  <circle cx="60" cy="60" r="46" fill="none" stroke="currentColor" className="text-slate-200 dark:text-slate-700" strokeWidth="16" />
+                  <circle
+                    cx="60" cy="60" r="46" fill="none" stroke="#10b981" strokeWidth="16" strokeLinecap="round"
+                    strokeDasharray={`${paidDash} ${donutC}`} transform="rotate(-90 60 60)"
+                  >
+                    <title>{isRTL ? `دفعوا: ${stats.paid}` : `Paid: ${stats.paid}`}</title>
+                  </circle>
+                  <circle
+                    cx="60" cy="60" r="46" fill="none" stroke="#f59e0b" strokeWidth="16" strokeLinecap="round"
+                    strokeDasharray={`${donutC - paidDash} ${donutC}`} strokeDashoffset={-paidDash} transform="rotate(-90 60 60)"
+                  >
+                    <title>{isRTL ? `لم يدفعوا: ${stats.total - stats.paid}` : `Unpaid: ${stats.total - stats.paid}`}</title>
+                  </circle>
+                  <text x="60" y="57" textAnchor="middle" className="fill-slate-800 dark:fill-white font-black" style={{ fontSize: 22 }}>{paidPct}%</text>
+                  <text x="60" y="74" textAnchor="middle" className="fill-slate-400" style={{ fontSize: 9 }}>{isRTL ? 'دفعوا' : 'paid'}</text>
+                </svg>
+                <div className="flex flex-col gap-2 text-sm min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-emerald-500 shrink-0" />
+                    <span className="font-bold text-slate-700 dark:text-slate-200">{isRTL ? 'دفعوا' : 'Paid'}</span>
+                    <span className="text-slate-400">({stats.paid})</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-amber-500 shrink-0" />
+                    <span className="font-bold text-slate-700 dark:text-slate-200">{isRTL ? 'لم يدفعوا' : 'Unpaid'}</span>
+                    <span className="text-slate-400">({stats.total - stats.paid})</span>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
