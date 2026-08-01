@@ -6,14 +6,14 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#282449', // Logo Navy
-          light: '#737088',
-          dark: '#1E1B36',
+          DEFAULT: '#241D5D', // Logo Navy, enriched
+          light: '#716C96',
+          dark: '#1C1749',
         },
         secondary: {
-          DEFAULT: '#F1AEA6', // Logo Peach
-          light: '#F4C2BC',
-          dark: '#CC938D',
+          DEFAULT: '#F6A197', // Logo Peach, enriched
+          light: '#F8B8B1',
+          dark: '#D18980',
         },
       },
       fontFamily: {

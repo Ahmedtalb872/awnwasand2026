@@ -4,8 +4,8 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "theme_color": "#282449",
-  "background_color": "#282449",
+  "theme_color": "#241D5D",
+  "background_color": "#241D5D",
   "lang": "ar",
   "description": "تطبيق عون وسند للعمل الخيري والتطوعي",
   "icons": [

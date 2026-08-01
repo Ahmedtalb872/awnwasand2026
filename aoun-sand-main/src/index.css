@@ -4,10 +4,10 @@
 
 @layer base {
   :root {
-    --primary: 40 36 73; /* logo navy */
-    --primary-light: 115 112 136; /* logo navy, lightened */
-    --secondary: 241 174 166; /* logo peach */
-    --accent: 241 174 166; /* logo peach */
+    --primary: 36 29 93; /* logo navy, enriched */
+    --primary-light: 113 108 150; /* logo navy, lightened */
+    --secondary: 246 161 151; /* logo peach, enriched */
+    --accent: 246 161 151; /* logo peach, enriched */
     --background: 248 250 252; /* slate-50 */
     --surface: 255 255 255; /* white */
     --text-main: 15 23 42; /* slate-900 */
@@ -15,10 +15,10 @@
   }
 
   .dark {
-    --primary: 115 112 136; /* logo navy, lightened for dark mode */
-    --primary-light: 244 194 188; /* logo peach, lightened */
-    --secondary: 241 174 166; /* logo peach */
-    --accent: 241 174 166; /* logo peach */
+    --primary: 113 108 150; /* logo navy, lightened for dark mode */
+    --primary-light: 248 184 177; /* logo peach, lightened */
+    --secondary: 246 161 151; /* logo peach, enriched */
+    --accent: 246 161 151; /* logo peach, enriched */
     --background: 15 23 42; /* slate-900 */
     --surface: 30 41 59; /* slate-800 */
     --text-main: 241 245 249; /* slate-100 */
@@ -57,7 +57,7 @@
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-bold transition-all duration-300 transform hover:-translate-y-1 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-bold text-base transition-all duration-300 transform hover:-translate-y-1 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-offset-2;
   }
 
   .btn-primary {
