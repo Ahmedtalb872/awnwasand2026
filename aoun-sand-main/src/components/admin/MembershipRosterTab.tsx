@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { Contact2, UserPlus, Trash2, Search, CheckCircle, Image, FileDown } from 'lucide-react';
+import { Contact2, UserPlus, Trash2, Search, CheckCircle, Image, FileDown, CalendarClock, RotateCcw } from 'lucide-react';
 import { generateFinancialPDF } from '../../utils/pdfGenerator';
 
 // Parses lines like "احمد, 44800028" or "44800028" or "فاطمة - 46xxxxxx"
@@ -26,6 +26,8 @@ const parseMemberLines = (raw: string): { name: string | null; phone: string; pa
     .filter((c): c is { name: string | null; phone: string; paid: boolean } => c !== null);
 };
 
+const currentMonthValue = () => new Date().toISOString().slice(0, 7);
+
 export const MembershipRosterTab = () => {
   const { language } = useLanguage();
   const isRTL = language === 'ar';
@@ -37,10 +39,18 @@ export const MembershipRosterTab = () => {
   const [newMembersRaw, setNewMembersRaw] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [downloadingPDF, setDownloadingPDF] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [feeMonth, setFeeMonth] = useState(() => localStorage.getItem('association_members_fee_month') || currentMonthValue());
+  const [isResetting, setIsResetting] = useState(false);
 
   useEffect(() => {
     fetchMembers();
   }, []);
+
+  const changeFeeMonth = (value: string) => {
+    setFeeMonth(value);
+    localStorage.setItem('association_members_fee_month', value);
+  };
 
   const fetchMembers = async () => {
     if (!adminId) { setLoading(false); return; }
@@ -68,6 +78,7 @@ export const MembershipRosterTab = () => {
       const { data, error } = await supabase.rpc('admin_add_association_members', {
         p_admin_id: adminId,
         p_members: parsed,
+        p_fee_month: feeMonth,
       });
       if (error) throw error;
       if (data?.success === false) throw new Error(data.message);
@@ -87,6 +98,7 @@ export const MembershipRosterTab = () => {
       const { error } = await supabase.rpc('admin_delete_association_member', { p_admin_id: adminId, p_id: id });
       if (error) throw error;
       setMembers(prev => prev.filter(m => m.id !== id));
+      setSelectedIds(prev => { const next = new Set(prev); next.delete(id); return next; });
     } catch (err: any) {
       toast.error(err.message || (isRTL ? 'فشل الحذف' : 'Failed to delete'));
     }
@@ -95,9 +107,9 @@ export const MembershipRosterTab = () => {
   const handleTogglePaid = async (id: string, current: boolean) => {
     if (!adminId) return;
     const next = !current;
-    setMembers(prev => prev.map(m => m.id === id ? { ...m, paid: next } : m));
+    setMembers(prev => prev.map(m => m.id === id ? { ...m, paid: next, fee_month: next ? feeMonth : m.fee_month } : m));
     try {
-      const { data, error } = await supabase.rpc('admin_set_association_member_paid', { p_admin_id: adminId, p_id: id, p_paid: next });
+      const { data, error } = await supabase.rpc('admin_set_association_member_paid', { p_admin_id: adminId, p_id: id, p_paid: next, p_fee_month: feeMonth });
       if (error) throw error;
       if (data?.success === false) throw new Error(data.message);
     } catch (err: any) {
@@ -126,6 +138,60 @@ export const MembershipRosterTab = () => {
     return members.filter(m => m.name?.toLowerCase().includes(q) || m.phone?.includes(q));
   }, [members, search]);
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+  const selectAllVisible = () => setSelectedIds(new Set(filteredMembers.map(m => m.id)));
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const handleBulkSetPaid = async (paid: boolean) => {
+    if (!adminId || selectedIds.size === 0) return;
+    const ids = [...selectedIds];
+    const prevMembers = members;
+    setMembers(prev => prev.map(m => ids.includes(m.id) ? { ...m, paid, fee_month: paid ? feeMonth : m.fee_month } : m));
+    try {
+      const { data, error } = await supabase.rpc('admin_set_association_members_paid_bulk', {
+        p_admin_id: adminId, p_ids: ids, p_paid: paid, p_fee_month: feeMonth,
+      });
+      if (error) throw error;
+      if (data?.success === false) throw new Error(data.message);
+      toast.success(paid
+        ? (isRTL ? `تم وضع ${ids.length} عضو كـ"دفعوا"` : `${ids.length} member(s) marked as paid`)
+        : (isRTL ? `تم وضع ${ids.length} عضو كـ"لم يدفعوا"` : `${ids.length} member(s) marked as unpaid`));
+      clearSelection();
+    } catch (err: any) {
+      setMembers(prevMembers);
+      toast.error(err.message || (isRTL ? 'فشل تحديث الحالة' : 'Failed to update status'));
+    }
+  };
+
+  const handleResetAllPaid = async () => {
+    if (!adminId) return;
+    const confirmed = window.confirm(isRTL
+      ? `هل أنت متأكد؟ سيتم وضع جميع الأعضاء (${stats.total}) كـ"لم يدفعوا" — يُستخدم هذا لبدء تحصيل شهر جديد.`
+      : `Are you sure? All ${stats.total} members will be marked "unpaid" — use this to start a new month's collection.`);
+    if (!confirmed) return;
+    setIsResetting(true);
+    const prevMembers = members;
+    setMembers(prev => prev.map(m => ({ ...m, paid: false })));
+    try {
+      const { data, error } = await supabase.rpc('admin_reset_association_members_paid', { p_admin_id: adminId });
+      if (error) throw error;
+      if (data?.success === false) throw new Error(data.message);
+      toast.success(isRTL ? 'تم وضع جميع الأعضاء كـ"لم يدفعوا"' : 'All members marked as unpaid');
+      clearSelection();
+    } catch (err: any) {
+      setMembers(prevMembers);
+      toast.error(err.message || (isRTL ? 'فشلت العملية' : 'Failed to reset'));
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   const stats = useMemo(() => ({
     total: members.length,
     paid: members.filter(m => m.paid).length,
@@ -150,6 +216,7 @@ export const MembershipRosterTab = () => {
       });
 
       const statCards = [
+        { label: isRTL ? 'شهر التحصيل' : 'Collection Month', value: feeMonth },
         { label: isRTL ? 'عدد الأعضاء' : 'Total Members', value: stats.total },
         { label: isRTL ? 'دفعوا الرسوم' : 'Paid', value: stats.paid },
         { label: isRTL ? 'استلمت صورة الدفع' : 'Receipt Received', value: stats.receipts },
@@ -160,7 +227,7 @@ export const MembershipRosterTab = () => {
         stats: statCards,
         columns,
         data: rows,
-        fileName: 'association_members_report.pdf',
+        fileName: `association_members_report_${feeMonth}.pdf`,
         logoUrl: '/logo.png',
       });
     } catch (err: any) {
@@ -191,6 +258,28 @@ export const MembershipRosterTab = () => {
           {isRTL ? 'قائمة أعضاء الجمعية مع حالة دفع رسوم الانتساب واستلام صورة إيصال الدفع.' : 'Association members list with membership fee payment status and receipt-photo status.'}
         </p>
 
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6 p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl">
+          <label className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 shrink-0">
+            <CalendarClock className="w-4 h-4 text-indigo-500" />
+            {isRTL ? 'شهر جمع الرسوم الحالي' : 'Current fee-collection month'}
+          </label>
+          <input
+            type="month"
+            value={feeMonth}
+            onChange={e => changeFeeMonth(e.target.value)}
+            className="input-field w-full sm:w-auto"
+          />
+          <button
+            onClick={handleResetAllPaid}
+            disabled={isResetting || stats.total === 0}
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 rounded-xl font-bold text-sm disabled:opacity-50 sm:ms-auto"
+            title={isRTL ? 'يضع جميع الأعضاء كـ"لم يدفعوا" لبدء تحصيل شهر جديد' : 'Marks all members "unpaid" to start a new month\'s collection'}
+          >
+            {isResetting ? <div className="w-4 h-4 border-2 border-red-300 border-t-red-600 rounded-full animate-spin" /> : <RotateCcw className="w-4 h-4" />}
+            {isRTL ? 'جعل الجميع لم يدفعوا' : 'Mark everyone unpaid'}
+          </button>
+        </div>
+
         <div className="grid grid-cols-3 gap-3 mb-6">
           <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 text-center">
             <p className="text-2xl font-black text-slate-800 dark:text-white">{stats.total}</p>
@@ -215,6 +304,33 @@ export const MembershipRosterTab = () => {
           />
         </div>
 
+        <div className="flex flex-wrap items-center gap-2 mb-2">
+          <button onClick={selectAllVisible} className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+            {isRTL ? 'تحديد الكل' : 'Select all'}
+          </button>
+          <button onClick={clearSelection} className="text-xs font-bold text-slate-500 hover:underline">
+            {isRTL ? 'إلغاء التحديد' : 'Clear'}
+          </button>
+          {selectedIds.size > 0 && (
+            <>
+              <span className="text-xs text-slate-400">{isRTL ? `${selectedIds.size} محدد` : `${selectedIds.size} selected`}</span>
+              <button
+                onClick={() => handleBulkSetPaid(true)}
+                className="flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full text-emerald-700 bg-emerald-100 hover:bg-emerald-200"
+              >
+                <CheckCircle className="w-3 h-3" />
+                {isRTL ? 'وضع المحددين: دفعوا' : 'Mark selected: paid'}
+              </button>
+              <button
+                onClick={() => handleBulkSetPaid(false)}
+                className="flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full text-amber-700 bg-amber-100 hover:bg-amber-200"
+              >
+                {isRTL ? 'وضع المحددين: لم يدفعوا' : 'Mark selected: unpaid'}
+              </button>
+            </>
+          )}
+        </div>
+
         {loading ? (
           <div className="flex justify-center py-8"><div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-500 rounded-full animate-spin" /></div>
         ) : (
@@ -223,6 +339,12 @@ export const MembershipRosterTab = () => {
               <div className="text-center py-8 text-slate-400 text-sm">{isRTL ? 'لا يوجد أعضاء بعد' : 'No members yet'}</div>
             ) : filteredMembers.map(m => (
               <div key={m.id} className="flex items-center gap-3 p-3 flex-wrap hover:bg-slate-50 dark:hover:bg-slate-800">
+                <input
+                  type="checkbox"
+                  checked={selectedIds.has(m.id)}
+                  onChange={() => toggleSelect(m.id)}
+                  className="w-4 h-4"
+                />
                 <span className="flex-1 min-w-0 font-bold text-sm text-slate-700 dark:text-slate-200 truncate">
                   {m.name || (isRTL ? 'بدون اسم' : 'No name')}
                 </span>
@@ -238,6 +360,7 @@ export const MembershipRosterTab = () => {
                 >
                   {m.paid && <CheckCircle className="w-3 h-3" />}
                   {m.paid ? (isRTL ? 'تم الدفع' : 'Paid') : (isRTL ? 'لم يدفع' : 'Unpaid')}
+                  {m.paid && m.fee_month && <span className="opacity-70">({m.fee_month})</span>}
                 </button>
                 <button
                   onClick={() => handleToggleReceipt(m.id, m.receipt_received)}
@@ -282,8 +405,8 @@ export const MembershipRosterTab = () => {
         </div>
         <p className="text-xs text-slate-400 mt-2">
           {isRTL
-            ? 'الصق الأسماء والأرقام هنا (سطر لكل عضو). إضافة ✅ في نهاية السطر تُدرج العضو كـ"تم الدفع" مباشرة. بعد ذلك بدّل حالة "الدفع" و"استلام صورة الدفع" لكل عضو حسب المتابعة.'
-            : 'Paste names and numbers here (one per line). A trailing ✅ marks that member as already paid on import. Afterward, toggle each member\'s "Paid" and "Receipt received" status as you follow up.'}
+            ? `الصق الأسماء والأرقام هنا (سطر لكل عضو). إضافة ✅ في نهاية السطر تُدرج العضو كـ"تم الدفع" لشهر ${feeMonth} مباشرة. بعد ذلك بدّل حالة "الدفع" و"استلام صورة الدفع" لكل عضو، أو حدّد عدة أعضاء وبدّل حالتهم دفعة واحدة، أو اضغط "جعل الجميع لم يدفعوا" عند بدء شهر تحصيل جديد.`
+            : `Paste names and numbers here (one per line). A trailing ✅ marks that member as already paid for ${feeMonth}. Afterward, toggle each member's status individually, select several and change them together, or click "Mark everyone unpaid" to start a new month's collection.`}
         </p>
       </div>
     </motion.div>

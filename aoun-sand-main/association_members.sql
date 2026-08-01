@@ -11,6 +11,11 @@ CREATE TABLE IF NOT EXISTS public.association_members (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Which fee-collection month a member's current "paid" status belongs to
+-- (e.g. '2026-07'), so the roster can be reset for a new month without
+-- losing track of what the last payment was for.
+ALTER TABLE public.association_members ADD COLUMN IF NOT EXISTS fee_month TEXT;
+
 ALTER TABLE public.association_members ENABLE ROW LEVEL SECURITY;
 -- No public policies: all access goes through the SECURITY DEFINER RPCs below.
 
@@ -24,11 +29,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-CREATE OR REPLACE FUNCTION admin_add_association_members(p_admin_id UUID, p_members JSON)
+CREATE OR REPLACE FUNCTION admin_add_association_members(p_admin_id UUID, p_members JSON, p_fee_month TEXT DEFAULT NULL)
 RETURNS JSON AS $$
 DECLARE
     v_count INT := 0;
     v_member JSON;
+    v_paid BOOLEAN;
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM public.system_admins WHERE id = p_admin_id AND is_active = true) THEN
         RETURN json_build_object('success', false, 'message', 'Unauthorized');
@@ -36,11 +42,13 @@ BEGIN
 
     FOR v_member IN SELECT * FROM json_array_elements(p_members)
     LOOP
-        INSERT INTO public.association_members (phone, name, paid, added_by)
-        VALUES (v_member->>'phone', v_member->>'name', COALESCE((v_member->>'paid')::boolean, false), p_admin_id)
+        v_paid := COALESCE((v_member->>'paid')::boolean, false);
+        INSERT INTO public.association_members (phone, name, paid, fee_month, added_by)
+        VALUES (v_member->>'phone', v_member->>'name', v_paid, CASE WHEN v_paid THEN p_fee_month ELSE NULL END, p_admin_id)
         ON CONFLICT (phone) DO UPDATE
             SET name = COALESCE(EXCLUDED.name, public.association_members.name),
-                paid = public.association_members.paid OR EXCLUDED.paid;
+                paid = public.association_members.paid OR EXCLUDED.paid,
+                fee_month = CASE WHEN EXCLUDED.paid THEN COALESCE(EXCLUDED.fee_month, public.association_members.fee_month) ELSE public.association_members.fee_month END;
         v_count := v_count + 1;
     END LOOP;
 
@@ -59,14 +67,50 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-CREATE OR REPLACE FUNCTION admin_set_association_member_paid(p_admin_id UUID, p_id UUID, p_paid BOOLEAN)
+CREATE OR REPLACE FUNCTION admin_set_association_member_paid(p_admin_id UUID, p_id UUID, p_paid BOOLEAN, p_fee_month TEXT DEFAULT NULL)
 RETURNS JSON AS $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM public.system_admins WHERE id = p_admin_id AND is_active = true) THEN
         RETURN json_build_object('success', false, 'message', 'Unauthorized');
     END IF;
-    UPDATE public.association_members SET paid = p_paid WHERE id = p_id;
+    UPDATE public.association_members
+    SET paid = p_paid,
+        fee_month = CASE WHEN p_paid THEN COALESCE(p_fee_month, fee_month) ELSE fee_month END
+    WHERE id = p_id;
     RETURN json_build_object('success', true);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Bulk-set paid status for a set of members at once (multi-select actions in the admin tab).
+CREATE OR REPLACE FUNCTION admin_set_association_members_paid_bulk(p_admin_id UUID, p_ids UUID[], p_paid BOOLEAN, p_fee_month TEXT DEFAULT NULL)
+RETURNS JSON AS $$
+DECLARE
+    v_count INT;
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM public.system_admins WHERE id = p_admin_id AND is_active = true) THEN
+        RETURN json_build_object('success', false, 'message', 'Unauthorized');
+    END IF;
+    UPDATE public.association_members
+    SET paid = p_paid,
+        fee_month = CASE WHEN p_paid THEN COALESCE(p_fee_month, fee_month) ELSE fee_month END
+    WHERE id = ANY(p_ids);
+    GET DIAGNOSTICS v_count = ROW_COUNT;
+    RETURN json_build_object('success', true, 'count', v_count);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Resets every member to "unpaid" — used to start a new month's fee-collection cycle.
+CREATE OR REPLACE FUNCTION admin_reset_association_members_paid(p_admin_id UUID)
+RETURNS JSON AS $$
+DECLARE
+    v_count INT;
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM public.system_admins WHERE id = p_admin_id AND is_active = true) THEN
+        RETURN json_build_object('success', false, 'message', 'Unauthorized');
+    END IF;
+    UPDATE public.association_members SET paid = false WHERE paid = true;
+    GET DIAGNOSTICS v_count = ROW_COUNT;
+    RETURN json_build_object('success', true, 'count', v_count);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
